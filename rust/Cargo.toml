@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "memory-manager",
+    "tab-manager",
+    "process-manager",
+    "resource-monitor",
+    "privacy-engine",
+    "cache-manager",
+    "download-manager",
+    "telemetry",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/feathersurf/featherSurf"

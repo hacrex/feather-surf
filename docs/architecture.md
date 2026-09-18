@@ -36,7 +36,9 @@ Tab
  └── Discardable
 ```
 
-A continuously recalculated score decides transitions:
+A continuously recalculated score decides transitions. The formal score,
+ thresholds, and hysteresis rules are specified in
+ [`docs/memory-management-policy.md`](memory-management-policy.md):
 
 ```
 Tab Score =

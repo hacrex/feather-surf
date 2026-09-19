@@ -1,0 +1,117 @@
+:root {
+  color-scheme: light;
+
+  /* FeatherSurf: sky, cloud, mint, and ink. */
+  --fs-ink-950: #102033;
+  --fs-ink-800: #24364a;
+  --fs-ink-600: #536a7f;
+  --fs-ink-400: #8da1b2;
+  --fs-cloud-50: #f8fbfd;
+  --fs-cloud-100: #eef5f8;
+  --fs-cloud-200: #dce9ef;
+  --fs-sky-400: #63b7d8;
+  --fs-sky-500: #329bc4;
+  --fs-sky-700: #176f96;
+  --fs-mint-400: #79d4b2;
+  --fs-mint-600: #3fa984;
+  --fs-amber-400: #f1c56b;
+  --fs-danger-500: #d96b73;
+
+  --fs-bg: var(--fs-cloud-50);
+  --fs-surface: #ffffff;
+  --fs-surface-raised: rgba(255, 255, 255, 0.88);
+  --fs-text: var(--fs-ink-950);
+  --fs-text-muted: var(--fs-ink-600);
+  --fs-border: var(--fs-cloud-200);
+  --fs-accent: var(--fs-sky-500);
+  --fs-accent-soft: #e0f3fa;
+  --fs-success: var(--fs-mint-600);
+  --fs-warning: #a5741d;
+  --fs-danger: var(--fs-danger-500);
+
+  --fs-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --fs-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --fs-radius-sm: 0.375rem;
+  --fs-radius-md: 0.625rem;
+  --fs-radius-lg: 0.875rem;
+  --fs-radius-pill: 999px;
+
+  --fs-shadow-sm: 0 1px 2px rgba(16, 32, 51, 0.06);
+  --fs-shadow-md: 0 8px 24px rgba(16, 32, 51, 0.10);
+  --fs-focus-ring: 0 0 0 3px rgba(50, 155, 196, 0.28);
+  --fs-motion-fast: 140ms;
+  --fs-motion-normal: 220ms;
+  --fs-motion-slow: 420ms;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --fs-bg: #0e1a28;
+  --fs-surface: #15263a;
+  --fs-surface-raised: rgba(21, 38, 58, 0.92);
+  --fs-text: #eff8fb;
+  --fs-text-muted: #a9bdc9;
+  --fs-border: #29445a;
+  --fs-accent: #75c8e5;
+  --fs-accent-soft: #173c51;
+  --fs-success: #83dfbd;
+  --fs-warning: #f3cc79;
+  --fs-danger: #f18b91;
+  --fs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --fs-shadow-md: 0 12px 28px rgba(0, 0, 0, 0.30);
+  --fs-focus-ring: 0 0 0 3px rgba(117, 200, 229, 0.28);
+}
+
+.fs-theme {
+  min-height: 100%;
+  background: var(--fs-bg);
+  color: var(--fs-text);
+  font-family: var(--fs-font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+.fs-theme :focus-visible {
+  outline: none;
+  box-shadow: var(--fs-focus-ring);
+}
+
+.fs-surface {
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius-md);
+  box-shadow: var(--fs-shadow-sm);
+}
+
+.fs-feather-mark {
+  display: inline-block;
+  transform-origin: 50% 80%;
+  animation: fs-feather-drift var(--fs-motion-slow) ease-out both;
+}
+
+.fs-feather-mark--idle {
+  animation: fs-feather-breathe 4.8s ease-in-out infinite;
+}
+
+.fs-feather-mark--enter {
+  animation: fs-feather-drift var(--fs-motion-slow) ease-out both;
+}
+
+@keyframes fs-feather-drift {
+  0% { opacity: 0; transform: translate3d(-10px, 8px, 0) rotate(-7deg) scale(0.94); }
+  70% { opacity: 1; transform: translate3d(2px, -2px, 0) rotate(2deg) scale(1.01); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); }
+}
+
+@keyframes fs-feather-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0); }
+  50% { transform: translate3d(0, -2px, 0) rotate(1.5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs-feather-mark,
+  .fs-feather-mark--idle,
+  .fs-feather-mark--enter {
+    animation: none;
+  }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" role="img" aria-labelledby="title desc">
+  <title id="title">FeatherSurf — privacy-first and RAM-aware</title>
+  <desc id="desc">A FeatherSurf badge with the feather mark and the words Privacy-first and RAM-aware.</desc>
+  <rect width="360" height="72" rx="36" fill="#102033"/>
+  <g transform="translate(18 10) scale(0.40)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 94 C33 65 54 34 101 25 C92 59 70 84 31 100" stroke="#F8FBFD" stroke-width="11"/>
+    <path d="M31 99 C51 80 69 57 88 34" stroke="#79D4B2" stroke-width="5"/>
+    <path d="M39 82 L27 75 M49 68 L35 60 M60 55 L48 46 M72 44 L63 34" stroke="#63B7D8" stroke-width="4"/>
+    <path d="M31 100 L20 111" stroke="#DCE9EF" stroke-width="5"/>
+  </g>
+  <text x="76" y="31" fill="#F8FBFD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">FeatherSurf</text>
+  <text x="76" y="53" fill="#79D4B2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">privacy-first · RAM-aware</text>
+</svg>

@@ -60,6 +60,10 @@ Very low score  → Discard
 
 All of this is transparent and user-configurable — never a silent black box.
 
+The tab process model, capability boundaries, IPC validation, and platform
+sandbox requirements are specified in
+[`docs/tab-execution-security.md`](tab-execution-security.md).
+
 ## 3. Adaptive memory modes
 
 | Mode | Target | Behavior |

@@ -3,6 +3,14 @@
 **The browser that respects your hardware.**
 *More Web. Less RAM.*
 
+<p align="center">
+  <img src="assets/branding/feathersurf-readme-banner.svg" alt="FeatherSurf — More web. Less RAM." width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/branding/feathersurf-badge.svg" alt="FeatherSurf privacy-first and RAM-aware badge" width="360" height="72" />
+</p>
+
 FeatherSurf is an open-source, privacy-first, RAM-efficient desktop browser
 designed to deliver a modern web experience without demanding high-end
 hardware.

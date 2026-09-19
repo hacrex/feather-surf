@@ -1,5 +1,5 @@
 [package]
-name = "featherSurf-tab-manager"
+name = "feathersurf-tab-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

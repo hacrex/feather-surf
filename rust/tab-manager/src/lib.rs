@@ -153,7 +153,10 @@ const fn is_legal_transition(from: TabState, to: TabState) -> bool {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TransitionError {
     AlreadyInState(TabState),
-    IllegalTransition { from: TabState, to: TabState },
+    IllegalTransition {
+        from: TabState,
+        to: TabState,
+    },
     Protected {
         target: TabState,
         protection: TabProtection,
@@ -262,7 +265,7 @@ mod tests {
     }
 
     #[test]
-    fn_media_playing_tabs_cannot_be_suspended_or_discarded() {
+    fn media_playing_tabs_cannot_be_suspended_or_discarded() {
         let mut tab = tab();
         tab.set_protection(TabProtection {
             media_playing: true,
@@ -324,15 +327,15 @@ mod property_like_tests {
     fn every_reclaimable_state_requires_unprotected_tab() {
         for target in [TabState::Frozen, TabState::Suspended, TabState::Discardable] {
             let mut tab = Tab::new(1, "about:blank");
-            tab.set_protection(TabProtection {
-                pinned: true,
-                ..TabProtection::default()
-            });
             tab.transition_to(TabState::RecentlyActive).unwrap();
             tab.transition_to(TabState::Background).unwrap();
             if target == TabState::Suspended {
                 tab.transition_to(TabState::Frozen).unwrap();
             }
+            tab.set_protection(TabProtection {
+                pinned: true,
+                ..TabProtection::default()
+            });
             assert!(tab.transition_to(target).is_err());
         }
     }

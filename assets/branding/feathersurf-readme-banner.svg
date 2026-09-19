@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" role="img" aria-labelledby="title desc">
+  <title id="title">FeatherSurf — a lighter browser</title>
+  <desc id="desc">A FeatherSurf promotional banner with a feather logo and the phrase More web, less RAM.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E1A28"/>
+      <stop offset="0.62" stop-color="#12344A"/>
+      <stop offset="1" stop-color="#176F96"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="48%" r="50%">
+      <stop offset="0" stop-color="#79D4B2" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#79D4B2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="420" rx="28" fill="url(#bg)"/>
+  <rect width="1600" height="420" rx="28" fill="url(#glow)"/>
+  <path d="M0 358 C260 296 430 388 690 330 S1170 218 1600 290" fill="none" stroke="#63B7D8" stroke-opacity="0.16" stroke-width="2"/>
+  <path d="M0 382 C310 320 470 420 760 350 S1240 258 1600 320" fill="none" stroke="#79D4B2" stroke-opacity="0.12" stroke-width="2"/>
+  <g transform="translate(1040 74) scale(2.08)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 94 C33 65 54 34 101 25 C92 59 70 84 31 100" stroke="#F8FBFD" stroke-width="11"/>
+    <path d="M31 99 C51 80 69 57 88 34" stroke="#79D4B2" stroke-width="5"/>
+    <path d="M39 82 L27 75 M49 68 L35 60 M60 55 L48 46 M72 44 L63 34" stroke="#63B7D8" stroke-width="4"/>
+    <path d="M31 100 L20 111" stroke="#DCE9EF" stroke-width="5"/>
+  </g>
+  <g fill="#F8FBFD" font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="112" y="152" font-size="30" letter-spacing="6" fill="#79D4B2">FEATHERSURF</text>
+    <text x="108" y="236" font-size="68" font-weight="700">More web.</text>
+    <text x="108" y="312" font-size="68" font-weight="700" fill="#79D4B2">Less RAM.</text>
+    <text x="112" y="356" font-size="22" fill="#C5DCE5">A privacy-first browser built to stay light.</text>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 [package]
-name = "featherSurf-cache-manager"
+name = "feathersurf-cache-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -36,25 +36,25 @@ documented, and tested from a clean installation on every target platform.
 
 ### 0.1 Make the repository status accurate
 
-- [ ] Add a clear project-status section to `README.md`.
-- [ ] Mark planned and scaffolded features as planned or experimental instead of claiming them as available.
-- [ ] Add a prominent warning that FeatherSurf is not yet suitable as a daily browser.
-- [ ] Add a supported-platform policy with tier definitions.
-- [ ] Add a minimum supported Rust version policy.
-- [ ] Add `CHANGELOG.md`.
-- [ ] Add `SECURITY.md` with private vulnerability-reporting instructions.
-- [ ] Add `SUPPORT.md` explaining where questions and bug reports belong.
-- [ ] Add `CODEOWNERS` for core, privacy, packaging, and documentation areas.
+- [x] Add a clear project-status section to `README.md`.
+- [x] Mark planned and scaffolded features as planned or experimental instead of claiming them as available.
+- [x] Add a prominent warning that FeatherSurf is not yet suitable as a daily browser.
+- [x] Add a supported-platform policy with tier definitions.
+- [x] Add a minimum supported Rust version policy.
+- [x] Add `CHANGELOG.md`.
+- [x] Add `SECURITY.md` with private vulnerability-reporting instructions.
+- [x] Add `SUPPORT.md` explaining where questions and bug reports belong.
+- [x] Add `CODEOWNERS` for core, privacy, packaging, and documentation areas.
 
 **Acceptance criteria:** A new contributor can determine the current implementation status, supported platforms, security-reporting path, and expected development workflow from the repository front page.
 
 ### 0.2 Normalize Rust workspace metadata
 
-- [ ] Rename crate packages to standard lowercase kebab-case names.
-- [ ] Correct the repository URL in `rust/Cargo.toml`.
-- [ ] Add workspace descriptions, authors, repository metadata, and `rust-version`.
-- [ ] Add descriptions and documentation links to each crate.
-- [ ] Add a root `rust-toolchain.toml` with the supported toolchain.
+- [x] Rename crate packages to standard lowercase kebab-case names.
+- [x] Correct the repository URL in `rust/Cargo.toml`.
+- [x] Add workspace descriptions, authors, repository metadata, and `rust-version`.
+- [x] Add descriptions and documentation links to each crate.
+- [x] Add a root `rust-toolchain.toml` with the supported toolchain.
 - [ ] Add formatting and lint configuration where needed.
 - [ ] Decide whether all Rust crates should remain independent libraries or whether a shared domain-model crate is needed.
 - [ ] Add `target` triples for cross-compilation: `x86_64-pc-windows-msvc`, `x86_64-unknown-linux-gnu`, `aarch64-apple-darwin`, `aarch64-linux-android`, `aarch64-apple-ios`.
@@ -63,16 +63,16 @@ documented, and tested from a clean installation on every target platform.
 
 ### 0.3 Add continuous integration
 
-- [ ] Add GitHub Actions for formatting, Clippy, tests, and documentation builds.
-- [ ] `[win]` Add Windows CI runner with MSVC toolchain.
-- [ ] `[linux]` Add Linux CI runner with GCC/glibc.
-- [ ] `[mac]` Add macOS CI runner with Xcode toolchain.
-- [ ] `[android]` Add Android NDK cross-compilation CI job.
-- [ ] `[ios]` Add iOS cross-compilation CI job (no simulator, build-only).
-- [ ] Add Markdown link checking.
+- [x] Add GitHub Actions for formatting, Clippy, tests, and documentation builds.
+- [x] `[win]` Add Windows CI runner with MSVC toolchain.
+- [x] `[linux]` Add Linux CI runner with GCC/glibc.
+- [x] `[mac]` Add macOS CI runner with Xcode toolchain.
+- [x] `[android]` Add Android NDK cross-compilation CI job.
+- [x] `[ios]` Add iOS cross-compilation CI job (no simulator, build-only).
+- [x] Add Markdown link checking.
 - [ ] Add dependency license and vulnerability checks (`cargo-audit`, `cargo-deny`).
-- [ ] Run CI on pull requests and pushes to `main`.
-- [ ] Cache Rust dependencies per-platform.
+- [x] Run CI on pull requests and pushes to `main`.
+- [x] Cache Rust dependencies per-platform.
 - [ ] Upload test and benchmark artifacts from CI.
 - [ ] Add a protected `main` branch requiring green CI.
 
@@ -80,8 +80,8 @@ documented, and tested from a clean installation on every target platform.
 
 ### 0.4 Improve contributor workflow
 
-- [ ] Add issue templates for bugs, feature requests, benchmark regressions, architecture decisions, and good-first issues.
-- [ ] Add a pull-request template containing scope, testing, security, and benchmark sections.
+- [x] Add issue templates for bugs, feature requests, benchmark regressions, architecture decisions, and good-first issues.
+- [x] Add a pull-request template containing scope, testing, security, and benchmark sections.
 - [ ] Create GitHub milestones for each project phase.
 - [ ] Label issues by component, platform, difficulty, and security impact.
 - [ ] Add at least ten small, actionable starter issues.

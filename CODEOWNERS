@@ -1,0 +1,50 @@
+# Code Owners for FeatherSurf
+#
+# These owners will be automatically requested for review
+# when someone opens a pull request.
+
+# Default owners for everything
+* @hacrex
+
+# Core Rust crates
+/rust/ @hacrex
+
+# Tab lifecycle and memory management
+/rust/tab-manager/ @hacrex
+/rust/memory-manager/ @hacrex
+/rust/process-manager/ @hacrex
+/rust/resource-monitor/ @hacrex
+
+# Session and storage
+/rust/session-manager/ @hacrex
+/rust/storage/ @hacrex
+
+# FFI and platform abstraction
+/rust/ffi/ @hacrex
+/rust/pal/ @hacrex
+
+# Privacy and security
+/rust/privacy-engine/ @hacrex
+/docs/security-model.md @hacrex
+/docs/adr-001-chromium-integration.md @hacrex
+
+# Browser shells
+/shells/ @hacrex
+/shells/windows/ @hacrex
+/shells/linux/ @hacrex
+
+# Documentation
+/docs/ @hacrex
+*.md @hacrex
+
+# CI/CD
+/.github/ @hacrex
+/scripts/ @hacrex
+
+# Packaging and distribution
+/installer/ @hacrex
+/packaging/ @hacrex
+/updater/ @hacrex
+
+# Benchmarks
+/benchmarks/ @hacrex

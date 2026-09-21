@@ -20,3 +20,12 @@ version = "0.0.1"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/hacrex/feather-surf"
+description = "FeatherSurf browser components"
+authors = ["FeatherSurf Contributors"]
+rust-version = "1.98.1"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+bincode = "1"
+thiserror = "2"
+proptest = "1"

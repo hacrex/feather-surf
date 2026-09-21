@@ -11,9 +11,34 @@
   <img src="assets/branding/feathersurf-badge.svg" alt="FeatherSurf privacy-first and RAM-aware badge" width="360" height="72" />
 </p>
 
+> **⚠️ WARNING: Pre-Alpha Software**
+> FeatherSurf is in early development (version 0.0.1). It is **NOT** suitable
+> for daily use. Features are incomplete, APIs are unstable, and data loss
+> may occur. Use only for testing and development purposes.
+
 FeatherSurf is an open-source, privacy-first, RAM-efficient desktop browser
 designed to deliver a modern web experience without demanding high-end
 hardware.
+
+---
+
+## Project Status
+
+| Milestone | Status |
+|-----------|--------|
+| M0 — Repository foundation | 🔄 In Progress |
+| M1 — Architecture decisions | ✅ Complete |
+| M2 — Domain model | ✅ Complete |
+| M3 — Browser shell | ✅ Complete |
+| M4 — Session/profiles | ✅ Complete |
+| M5 — Resource monitoring | ✅ Complete |
+| M6 — AI integration | ⏳ Pending |
+| M7 — Performance | ⏳ Pending |
+| M8 — QA | ⏳ Pending |
+
+**Current version:** 0.0.1 (pre-alpha)
+
+For detailed status, see [todo.md](todo.md).
 
 ---
 
@@ -154,6 +179,21 @@ idle RAM, CPU, startup time, tab-restore time, and battery draw.
 | 6 | AI — assistant, summarization, local + cloud providers, developer assistant |
 
 Full detail in [`docs/roadmap.md`](docs/roadmap.md).
+
+---
+
+## Supported Platforms
+
+| Tier | Platforms | Status |
+|------|-----------|--------|
+| Tier 1 | Windows 10+, Ubuntu 22.04+, Fedora 38+ | Primary development |
+| Tier 2 | macOS 13+, Debian 12+, Arch Linux | Community support |
+| Tier 3 | Android 10+, iOS 16+ | Planned for later phase |
+
+### Minimum Supported Rust Version (MSRV)
+
+- **Rust 1.98.1** (specified in `rust/rust-toolchain.toml`)
+- Edition: 2021
 
 ---
 

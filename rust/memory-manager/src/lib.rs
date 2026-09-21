@@ -18,6 +18,207 @@ pub enum MemoryMode {
     Performance,
 }
 
+/// Budget type for browser memory usage.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MemoryBudget {
+    /// No limit on memory usage.
+    Unlimited,
+    /// Fixed byte limit.
+    Fixed(u64),
+    /// Adaptive: target percentage of system RAM.
+    Adaptive { target_pct: f64 },
+}
+
+impl Default for MemoryBudget {
+    fn default() -> Self {
+        Self::Adaptive { target_pct: 50.0 }
+    }
+}
+
+impl MemoryBudget {
+    /// Create a fixed budget in MB.
+    pub fn fixed_mb(mb: u64) -> Self {
+        Self::Fixed(mb * 1024 * 1024)
+    }
+
+    /// Create an adaptive budget with target percentage of system RAM.
+    pub fn adaptive(target_pct: f64) -> Self {
+        Self::Adaptive {
+            target_pct: target_pct.clamp(10.0, 90.0),
+        }
+    }
+
+    /// Calculate the effective budget given system RAM.
+    /// Returns None if unlimited.
+    pub fn effective_budget(&self, system_ram: u64) -> Option<u64> {
+        match self {
+            Self::Unlimited => None,
+            Self::Fixed(bytes) => Some(*bytes),
+            Self::Adaptive { target_pct } => {
+                Some((system_ram as f64 * target_pct / 100.0) as u64)
+            }
+        }
+    }
+
+    /// Check if current usage exceeds budget.
+    pub fn is_over_budget(&self, used: u64, system_ram: u64) -> bool {
+        match self.effective_budget(system_ram) {
+            Some(budget) => used > budget,
+            None => false,
+        }
+    }
+
+    /// Calculate how much memory to reclaim to get back to budget.
+    pub fn reclaim_amount(&self, used: u64, system_ram: u64) -> u64 {
+        match self.effective_budget(system_ram) {
+            Some(budget) => {
+                if used > budget {
+                    used - budget
+                } else {
+                    0
+                }
+            }
+            None => 0,
+        }
+    }
+}
+
+/// Validates and applies memory budgets.
+pub struct BudgetManager {
+    budget: MemoryBudget,
+    system_ram: u64,
+    warning_threshold_pct: f64,
+    critical_threshold_pct: f64,
+}
+
+impl Default for BudgetManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl BudgetManager {
+    pub fn new() -> Self {
+        Self {
+            budget: MemoryBudget::default(),
+            system_ram: 8 * 1024 * 1024 * 1024, // 8GB default
+            warning_threshold_pct: 80.0,
+            critical_threshold_pct: 95.0,
+        }
+    }
+
+    /// Create with system RAM and budget.
+    pub fn with_budget(system_ram: u64, budget: MemoryBudget) -> Self {
+        Self {
+            budget,
+            system_ram,
+            ..Self::new()
+        }
+    }
+
+    /// Update system RAM detection.
+    pub fn set_system_ram(&mut self, ram: u64) {
+        self.system_ram = ram;
+    }
+
+    /// Set the budget.
+    pub fn set_budget(&mut self, budget: MemoryBudget) {
+        self.budget = budget;
+    }
+
+    /// Get current budget.
+    pub fn budget(&self) -> &MemoryBudget {
+        &self.budget
+    }
+
+    /// Get system RAM.
+    pub fn system_ram(&self) -> u64 {
+        self.system_ram
+    }
+
+    /// Get effective budget in bytes.
+    pub fn effective_budget(&self) -> Option<u64> {
+        self.budget.effective_budget(self.system_ram)
+    }
+
+    /// Check if usage is over budget.
+    pub fn is_over_budget(&self, used: u64) -> bool {
+        self.budget.is_over_budget(used, self.system_ram)
+    }
+
+    /// Get amount to reclaim.
+    pub fn reclaim_amount(&self, used: u64) -> u64 {
+        self.budget.reclaim_amount(used, self.system_ram)
+    }
+
+    /// Check if usage is at warning level.
+    pub fn is_warning(&self, used: u64) -> bool {
+        if self.system_ram == 0 {
+            return false;
+        }
+        let pct = (used as f64 / self.system_ram as f64) * 100.0;
+        pct >= self.warning_threshold_pct
+    }
+
+    /// Check if usage is at critical level.
+    pub fn is_critical(&self, used: u64) -> bool {
+        if self.system_ram == 0 {
+            return false;
+        }
+        let pct = (used as f64 / self.system_ram as f64) * 100.0;
+        pct >= self.critical_threshold_pct
+    }
+
+    /// Validate a budget against system RAM.
+    pub fn validate_budget(&self, budget: &MemoryBudget) -> Result<(), String> {
+        match budget {
+            MemoryBudget::Unlimited => Ok(()),
+            MemoryBudget::Fixed(bytes) => {
+                if *bytes > self.system_ram {
+                    Err(format!(
+                        "Budget {} MB exceeds system RAM {} MB",
+                        bytes / (1024 * 1024),
+                        self.system_ram / (1024 * 1024)
+                    ))
+                } else {
+                    Ok(())
+                }
+            }
+            MemoryBudget::Adaptive { target_pct } => {
+                if *target_pct < 10.0 || *target_pct > 90.0 {
+                    Err(format!(
+                        "Target percentage {}% must be between 10% and 90%",
+                        target_pct
+                    ))
+                } else {
+                    Ok(())
+                }
+            }
+        }
+    }
+
+    /// Get budget summary as a string.
+    pub fn budget_summary(&self, used: u64) -> String {
+        match self.effective_budget() {
+            Some(budget) => {
+                let used_mb = used / (1024 * 1024);
+                let budget_mb = budget / (1024 * 1024);
+                let pct = if budget > 0 {
+                    (used as f64 / budget as f64 * 100.0) as u32
+                } else {
+                    0
+                };
+                format!("{}/{} MB ({}%)", used_mb, budget_mb, pct)
+            }
+            None => {
+                let used_mb = used / (1024 * 1024);
+                let system_mb = self.system_ram / (1024 * 1024);
+                format!("{} MB / {} MB (unlimited)", used_mb, system_mb)
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TabObservation {
     pub activity: f64,

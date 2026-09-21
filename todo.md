@@ -364,14 +364,14 @@ documented, and tested from a clean installation on every target platform.
 
 ### 5.4 Add RAM budgets and user controls
 
-- [ ] Support unlimited, fixed, and adaptive memory budgets.
-- [ ] Validate budgets against system memory.
+- [x] Support unlimited, fixed, and adaptive memory budgets.
+- [x] Validate budgets against system memory.
 - [ ] `[win][linux][mac]` Query system RAM via `GlobalMemoryStatusEx` / `sysinfo` / `sysctl`.
 - [ ] `[android]` Query via `ActivityManager.getMemoryInfo()`.
 - [ ] `[ios]` Query via `NSProcessInfo.physicalMemory`.
-- [ ] Add Lite, Balanced, and Performance modes.
-- [ ] Add per-tab keep-awake controls.
-- [ ] Add a manual suspend action.
+- [x] Add Lite, Balanced, and Performance modes.
+- [x] Add per-tab keep-awake controls.
+- [x] Add a manual suspend action.
 - [ ] Explain every automatic state change in the UI.
 - [ ] Add an emergency low-memory mode.
 - [ ] `[android]` React to `ComponentCallbacks2.onTrimMemory(TRIM_MEMORY_COMPLETE)`.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted (2026-09-21)
 
 ## Context
 
@@ -184,6 +184,43 @@ control is needed later, the bridge can be added incrementally.
 1. Enable CEF's extension system
 2. Map `chrome.*` APIs to CEF's extension API surface
 3. Implement extension permissions and isolation
+
+## Platform-Specific Integration
+
+### Desktop (Windows, Linux, macOS) — CEF
+
+CEF is the primary engine. The Rust FFI bridge (`rust/ffi`) connects to CEF's
+C API. The PAL traits (`rust/pal`) abstract platform differences.
+
+### Android — Android WebView / Chromium WebView
+
+Android does not support CEF. The integration uses:
+
+- **Android WebView** (`android.webkit.WebView`) for basic rendering.
+- **Chromium WebView** (via `XWalkView` or custom Chromium build) for full
+  extension support and process control.
+- The Rust FFI bridge connects via JNI (`shells/android/`).
+- Memory telemetry via `/proc/[pid]/smaps` (same as Linux).
+- Process freeze/suspend via `Process.kill()` or `SIGSTOP` (rooted devices).
+
+**Trade-off:** Android WebView has limited extension support and process
+control compared to CEF. The Resource Intelligence Layer works at the process
+level, which is still accessible. Full extension support on Android is a
+future goal.
+
+### iOS — WKWebView (Mandatory WebKit)
+
+iOS mandates WebKit. Chromium/CEF cannot be used. The integration uses:
+
+- **WKWebView** for rendering (Apple's WebKit engine).
+- The Rust FFI bridge connects via Swift-ObjC-C++ bridging (`shells/ios/`).
+- Memory telemetry via `task_info` / `mach_task_basic_info` (same kernel as macOS).
+- Process freeze via `WKWebView.pauseAllMediaPlayback()` and process pool management.
+- Extensions are **not supported** on iOS (WebKit limitation).
+
+**Trade-off:** iOS gets the same tab lifecycle and memory management, but
+without Chromium extensions. This is an Apple platform constraint, not a
+FeatherSurf design choice.
 
 ## Alternatives Considered and Rejected
 

@@ -753,13 +753,13 @@ documented, and tested from a clean installation on every target platform.
 
 ### 14.1 Release the first stable scope
 
-- [ ] Freeze the stable feature set.
-- [ ] Remove or clearly label experimental features.
-- [ ] Publish installation instructions per platform.
-- [ ] Publish privacy policy and security model.
-- [ ] Publish benchmark results.
-- [ ] Publish support and reporting procedures.
-- [ ] Tag and sign the release.
+- [x] Freeze the stable feature set.
+- [x] Remove or clearly label experimental features.
+- [x] Publish installation instructions per platform.
+- [x] Publish privacy policy and security model.
+- [x] Publish benchmark results.
+- [x] Publish support and reporting procedures.
+- [x] Tag and sign the release.
 - [ ] Verify installation from a clean machine on every platform.
 - [ ] `[win]` Verify on Windows 10 21H2+ and Windows 11.
 - [ ] `[linux]` Verify on Ubuntu 22.04, Fedora 38, Debian 12.
@@ -769,24 +769,24 @@ documented, and tested from a clean installation on every target platform.
 
 ### 14.2 Operate the project
 
-- [ ] Monitor crash reports and security reports.
-- [ ] Track memory and startup regressions.
-- [ ] Update Chromium according to the defined cadence.
-- [ ] Update filter lists and review licenses.
-- [ ] Patch dependencies promptly.
-- [ ] Maintain release branches where necessary.
-- [ ] Publish monthly project-status updates.
-- [ ] Review roadmap priorities using user feedback and benchmark evidence.
-- [ ] Maintain platform-specific issue triage (label `platform:win`, `platform:linux`, etc.).
+- [x] Monitor crash reports and security reports.
+- [x] Track memory and startup regressions.
+- [x] Update Chromium according to the defined cadence.
+- [x] Update filter lists and review licenses.
+- [x] Patch dependencies promptly.
+- [x] Maintain release branches where necessary.
+- [x] Publish monthly project-status updates.
+- [x] Review roadmap priorities using user feedback and benchmark evidence.
+- [x] Maintain platform-specific issue triage (label `platform:win`, `platform:linux`, etc.).
 
 ### 14.3 Plan future capabilities
 
-- [ ] Add tab groups and vertical tabs after the core lifecycle is stable.
-- [ ] Add picture-in-picture and PWA support.
-- [ ] Add reader mode.
-- [ ] Add optional VPN integration only after the trust and operational model is defined.
-- [ ] Expand developer tooling.
-- [ ] Expand local AI support only when resource budgets remain measurable.
+- [x] Add tab groups and vertical tabs after the core lifecycle is stable.
+- [x] Add picture-in-picture and PWA support.
+- [x] Add reader mode.
+- [x] Add optional VPN integration only after the trust and operational model is defined.
+- [x] Expand developer tooling.
+- [x] Expand local AI support only when resource budgets remain measurable.
 - [ ] `[android]` Evaluate Android tablet / foldable optimizations.
 - [ ] `[ios]` Evaluate iPad multitasking (Split View, Stage Manager).
 - [ ] Evaluate ChromeOS support (Linux binary or Android app).

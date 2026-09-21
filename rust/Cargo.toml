@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "memory-manager",
     "tab-manager",
+    "session-manager",
     "process-manager",
     "resource-monitor",
     "privacy-engine",

@@ -1,7 +1,8 @@
-//! telemetry — part of FeatherSurf's Rust-native resource-management layer.
+//! telemetry — Structured logging and privacy-safe diagnostics.
 //!
-//! Scaffold only. See /docs/architecture.md for this component's role.
+//! Provides privacy-safe logging with redaction for sensitive data,
+//! structured log entries, and diagnostic export.
 
-pub fn placeholder() {
-    // Implementation begins in Phase 2 (RAM Engine) of the roadmap.
-}
+pub mod logger;
+
+pub use logger::{Logger, LogLevel, Redactor, LogEntry};

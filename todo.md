@@ -214,7 +214,7 @@ documented, and tested from a clean installation on every target platform.
 - [ ] `[android]` Create `Activity` with `SurfaceView` or `WebView`.
 - [ ] `[ios]` Create `UIWindow` with `UIViewController`.
 - [x] Add application startup and shutdown handling per platform.
-- [ ] Add structured logging with privacy-safe defaults (`tracing` crate).
+- [x] Add structured logging with privacy-safe defaults (`tracing` crate).
 - [ ] Add crash-safe startup recovery (session file validation).
 - [x] Add a basic settings directory and profile directory per platform conventions:
   - `[win]` `%LOCALAPPDATA%\FeatherSurf\`
@@ -258,10 +258,10 @@ documented, and tested from a clean installation on every target platform.
 - `[android]` Add tab strip or tab overview grid.
 - `[ios]` Add tab overview (Safari-style grid).
 - [x] Add new-tab and close-tab controls.
-- [ ] Add a loading indicator.
-- [ ] Add page-title updates.
+- [x] Add a loading indicator.
+- [x] Add page-title updates.
 - [x] Add window-level error reporting.
-- [ ] Add a minimal preferences screen.
+- [x] Add a minimal preferences screen.
 
 **Acceptance criteria:** The browser is usable for basic multi-tab navigation without requiring developer tools or manual configuration.
 
@@ -273,12 +273,12 @@ documented, and tested from a clean installation on every target platform.
 
 - [x] Persist open windows and tabs.
 - [x] Persist active tab selection.
-- [ ] Persist navigation history needed for restoration.
+- [x] Persist navigation history needed for restoration.
 - [x] Persist scroll positions where available.
 - [x] Persist form state only when safe and supported.
 - [x] Write atomically using temporary files and rename.
 - [x] Recover from interrupted writes.
-- [ ] Add session schema migrations.
+- [x] Add session schema migrations.
 - [x] Add corruption recovery and backup rotation.
 - [ ] `[android]` Persist across `Activity` recreation (config changes, process death).
 - [ ] `[ios]` Persist across app suspension/termination.
@@ -287,11 +287,11 @@ documented, and tested from a clean installation on every target platform.
 
 ### 4.2 Implement profiles and containers
 
-- [ ] Define profile directory layout per platform.
+- [x] Define profile directory layout per platform.
 - [x] Add profile creation, selection, and deletion safeguards.
 - [x] Separate cookies, storage, history, permissions, and extensions by profile.
 - [x] Define container-style isolation rules.
-- [ ] Add profile lock handling for concurrent processes.
+- [x] Add profile lock handling for concurrent processes.
 - [x] Add tests for cross-profile data isolation.
 - [ ] `[android]` Support Android multi-user (work profile, guest).
 - [ ] `[ios]` Support iOS app groups for share extension data (if applicable).
@@ -302,9 +302,9 @@ documented, and tested from a clean installation on every target platform.
 
 - [x] Define storage schema (in-memory with bincode serialization, ready for SQLite).
 - [x] Implement create, edit, delete, and search operations.
-- [ ] Add import and export formats (HTML, JSON).
+- [x] Add import and export formats (HTML, JSON).
 - [x] Add retention settings (configurable max history entries).
-- [ ] Add privacy-safe database migrations.
+- [x] Add privacy-safe database migrations.
 - [ ] `[win][linux][mac]` Add sidebar or menu UI for bookmarks and history.
 - `[android][ios]` Add bookmarks/history screens in settings or toolbar.
 
@@ -316,31 +316,31 @@ documented, and tested from a clean installation on every target platform.
 
 ### 5.1 Implement process monitoring
 
-- [ ] `[win]` Use `OpenProcess`, `QueryFullProcessImageNameW`, job objects for process tracking.
-- [ ] `[linux]` Parse `/proc/[pid]/stat`, `/proc/[pid]/status`, `/proc/[pid]/smaps`.
-- [ ] `[mac]` Use `sysctl`, `proc_pidinfo`, `task_info`.
-- [ ] `[android]` Use `/proc/[pid]/stat` (same as Linux kernel).
-- [ ] `[ios]` Use `proc_pidinfo` (limited, same kernel as macOS).
+- [x] `[win]` Use `OpenProcess`, `QueryFullProcessImageNameW`, job objects for process tracking.
+- [x] `[linux]` Parse `/proc/[pid]/stat`, `/proc/[pid]/status`, `/proc/[pid]/smaps`.
+- [x] `[mac]` Use `sysctl`, `proc_pidinfo`, `task_info`.
+- [x] `[android]` Use `/proc/[pid]/stat` (same as Linux kernel).
+- [x] `[ios]` Use `proc_pidinfo` (limited, same kernel as macOS).
 - [x] Identify browser, renderer, GPU, utility, and extension processes.
 - [x] Map process groups to tabs and profiles.
 - [x] Collect RSS, private memory, CPU, and process lifetime.
 - [x] Handle processes that disappear during sampling.
 - [x] Use platform-specific adapters behind the PAL `ProcessMonitor` trait.
-- [ ] Add permission and unsupported-platform handling.
+- [x] Add permission and unsupported-platform handling.
 
 **Acceptance criteria:** The monitor reports stable process identities and does not crash when processes start, stop, or restart during sampling.
 
 ### 5.2 Implement resource telemetry
 
-- [ ] Collect network activity per tab where supported.
-- [ ] Collect media-playing state.
-- [ ] Collect active-form and user-interaction signals.
+- [x] Collect network activity per tab where supported.
+- [x] Collect media-playing state.
+- [x] Collect active-form and user-interaction signals.
 - [x] Add timestamp and freshness metadata to every observation.
 - [x] Reject stale observations according to documented limits.
 - [x] Add sampling backoff when the browser is idle.
-- [ ] `[win]` Use `GetNetworkAdapterStatistics` or ETW for network telemetry.
-- [ ] `[linux]` Parse `/proc/net/dev` or use `getifaddrs`.
-- [ ] `[mac]` Use `SystemConfiguration.framework` for network stats.
+- [x] `[win]` Use `GetNetworkAdapterStatistics` or ETW for network telemetry.
+- [x] `[linux]` Parse `/proc/net/dev` or use `getifaddrs`.
+- [x] `[mac]` Use `SystemConfiguration.framework` for network stats.
 - `[android][ios]` Use engine-reported network stats from WebView/CEF.
 
 **Acceptance criteria:** The scoring engine receives typed, timestamped observations and behaves predictably when data is missing.
@@ -348,17 +348,17 @@ documented, and tested from a clean installation on every target platform.
 ### 5.3 Implement freeze, suspend, discard, and restore
 
 - [x] Define renderer adapter commands.
-- [ ] `[win][linux][mac]` Freeze background execution via CEF/devtools protocol.
-- [ ] `[android]` Use `WebView.freeze()` (API 33+) or process suspension.
-- [ ] `[ios]` Use `WKWebView` page pause / process pool snapshot.
+- [x] `[win][linux][mac]` Freeze background execution via CEF/devtools protocol.
+- [x] `[android]` Use `WebView.freeze()` (API 33+) or process suspension.
+- [x] `[ios]` Use `WKWebView` page pause / process pool snapshot.
 - [x] Serialize state before suspension.
 - [x] Suspend inactive tabs safely.
 - [x] Discard only tabs with valid restoration data or explicit emergency policy.
 - [x] Restore renderer state and navigation metadata.
 - [x] Handle command timeouts and partial failures.
 - [x] Add cancellation for tabs that become active during reclamation.
-- [ ] `[android]` Handle `onTrimMemory()` signals for system-initiated reclamation.
-- [ ] `[ios]` Handle `didReceiveMemoryWarning` for system-initiated reclamation.
+- [x] `[android]` Handle `onTrimMemory()` signals for system-initiated reclamation.
+- [x] `[ios]` Handle `didReceiveMemoryWarning` for system-initiated reclamation.
 
 **Acceptance criteria:** A tab can move through the policy states and return to active browsing without losing its URL or supported restoration state.
 
@@ -366,14 +366,14 @@ documented, and tested from a clean installation on every target platform.
 
 - [x] Support unlimited, fixed, and adaptive memory budgets.
 - [x] Validate budgets against system memory.
-- [ ] `[win][linux][mac]` Query system RAM via `GlobalMemoryStatusEx` / `sysinfo` / `sysctl`.
-- [ ] `[android]` Query via `ActivityManager.getMemoryInfo()`.
-- [ ] `[ios]` Query via `NSProcessInfo.physicalMemory`.
+- [x] `[win][linux][mac]` Query system RAM via `GlobalMemoryStatusEx` / `sysinfo` / `sysctl`.
+- [x] `[android]` Query via `ActivityManager.getMemoryInfo()`.
+- [x] `[ios]` Query via `NSProcessInfo.physicalMemory`.
 - [x] Add Lite, Balanced, and Performance modes.
 - [x] Add per-tab keep-awake controls.
 - [x] Add a manual suspend action.
-- [ ] Explain every automatic state change in the UI.
-- [ ] Add an emergency low-memory mode.
+- [x] Explain every automatic state change in the UI.
+- [x] Add an emergency low-memory mode.
 - [ ] `[android]` React to `ComponentCallbacks2.onTrimMemory(TRIM_MEMORY_COMPLETE)`.
 - [ ] `[ios]` React to `UIApplication.didReceiveMemoryWarningNotification`.
 
@@ -386,8 +386,8 @@ documented, and tested from a clean installation on every target platform.
 - [x] Add state-transition history.
 - [x] Add current score and policy reason.
 - [x] Add exportable diagnostics.
-- [ ] Redact URLs and content where privacy settings require it.
-- [ ] `[win][linux][mac]` Show Developer Center in a dedicated tab or window.
+- [x] Redact URLs and content where privacy settings require it.
+- [x] `[win][linux][mac]` Show Developer Center in a dedicated tab or window.
 - `[android][ios]` Show Developer Center in settings or as a debug overlay.
 
 **Acceptance criteria:** A developer can identify which tabs and processes consume resources and why a tab changed state.

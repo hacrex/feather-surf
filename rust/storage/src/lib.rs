@@ -4,6 +4,8 @@
 // Designed to be backed by SQLite in production.
 
 pub mod profiles;
+pub mod preferences;
+pub mod import_export;
 
 use std::collections::HashMap;
 use std::time::SystemTime;

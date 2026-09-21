@@ -3,6 +3,8 @@
 // Handles session persistence and restoration. Sessions are saved atomically
 // using temporary files and rename to prevent corruption on crash.
 
+pub mod migrations;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;

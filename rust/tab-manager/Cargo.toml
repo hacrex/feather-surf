@@ -8,3 +8,6 @@ description = "Policy-aware tab lifecycle state machine for FeatherSurf"
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 bincode = "1"
+
+[dev-dependencies]
+proptest = "1"

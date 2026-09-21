@@ -1200,3 +1200,159 @@ mod hysteresis_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod property_tests {
+    use super::*;
+    use proptest::prelude::*;
+
+    fn arb_observation() -> impl Strategy<Value = TabObservation> {
+        (
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+            -1.0f64..2.0,
+        )
+            .prop_map(
+                |(activity, media, user_interaction, network, memory, cpu, pinned, foreground)| {
+                    TabObservation {
+                        activity,
+                        media,
+                        user_interaction,
+                        network,
+                        memory,
+                        cpu,
+                        pinned,
+                        foreground,
+                    }
+                },
+            )
+    }
+
+    proptest! {
+        #[test]
+        fn score_always_bounded(obs in arb_observation()) {
+            let score = obs.keep_resident_score();
+            prop_assert!((0.0..=1.0).contains(&score),
+                "score {} out of [0,1] range", score);
+        }
+
+        #[test]
+        fn reclaim_pressure_always_bounded(
+            obs in arb_observation(),
+            budget_pressure in 0.0f64..1.0
+        ) {
+            let pressure = obs.reclaim_pressure(budget_pressure);
+            prop_assert!((0.0..=1.0).contains(&pressure),
+                "pressure {} out of [0,1] range", pressure);
+        }
+
+        #[test]
+        fn budget_pressure_only_increases_pressure_for_inactive(
+            activity in 0.0f64..1.0,
+            foreground in 0.0f64..1.0,
+            media in 0.0f64..1.0,
+            user_interaction in 0.0f64..1.0,
+            pinned in 0.0f64..1.0
+        ) {
+            let obs = TabObservation {
+                activity,
+                foreground,
+                media,
+                user_interaction,
+                pinned,
+                ..TabObservation::default()
+            };
+            let p0 = obs.reclaim_pressure(0.0);
+            let p1 = obs.reclaim_pressure(1.0);
+            // With budget pressure, pressure should never decrease
+            prop_assert!(p1 >= p0,
+                "budget pressure decreased pressure: {} -> {}", p0, p1);
+        }
+
+        #[test]
+        fn fully_active_tab_has_high_score(
+            activity in 0.8f64..1.0,
+            foreground in 0.8f64..1.0
+        ) {
+            let obs = TabObservation {
+                activity,
+                foreground,
+                ..TabObservation::default()
+            };
+            let score = obs.keep_resident_score();
+            prop_assert!(score > 0.3,
+                "active tab score {} too low", score);
+        }
+
+        #[test]
+        fn idle_tab_has_low_score(
+            memory in 0.0f64..1.0,
+            cpu in 0.0f64..1.0
+        ) {
+            let obs = TabObservation {
+                memory,
+                cpu,
+                ..TabObservation::default()
+            };
+            let score = obs.keep_resident_score();
+            // Idle tabs with high resource usage should score low
+            if memory > 0.5 && cpu > 0.5 {
+                prop_assert!(score < 0.2,
+                    "idle heavy tab score {} too high", score);
+            }
+        }
+
+        #[test]
+        fn pinned_tab_scores_higher_than_unpinned(
+            base_activity in 0.0f64..1.0,
+            base_foreground in 0.0f64..1.0
+        ) {
+            let base = TabObservation {
+                activity: base_activity,
+                foreground: base_foreground,
+                ..TabObservation::default()
+            };
+            let pinned = TabObservation {
+                pinned: 1.0,
+                ..base
+            };
+            prop_assert!(pinned.keep_resident_score() >= base.keep_resident_score(),
+                "pinned {} <= unpinned {}", pinned.keep_resident_score(), base.keep_resident_score());
+        }
+
+        #[test]
+        fn score_is_deterministic(obs in arb_observation()) {
+            let s1 = obs.keep_resident_score();
+            let s2 = obs.keep_resident_score();
+            prop_assert_eq!(s1, s2);
+        }
+
+        #[test]
+        fn reclaim_pressure_complement_of_score(
+            activity in 0.0f64..1.0,
+            foreground in 0.0f64..1.0,
+            media in 0.0f64..1.0,
+            user_interaction in 0.0f64..1.0,
+            network in 0.0f64..1.0,
+            pinned in 0.0f64..1.0,
+            memory in 0.0f64..1.0,
+            cpu in 0.0f64..1.0
+        ) {
+            let obs = TabObservation {
+                activity, foreground, media, user_interaction,
+                network, pinned, memory, cpu,
+            };
+            let score = obs.keep_resident_score();
+            let pressure = obs.reclaim_pressure(0.0);
+            // Q = 1 - K, so K + Q should be approximately 1
+            let sum = score + pressure;
+            prop_assert!((sum - 1.0).abs() < 0.01,
+                "score {} + pressure {} = {} != 1.0", score, pressure, sum);
+        }
+    }
+}

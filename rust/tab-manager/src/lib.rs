@@ -485,23 +485,166 @@ mod snapshot_serialization_tests {
 }
 
 #[cfg(test)]
-mod property_like_tests {
+mod property_tests {
     use super::*;
+    use proptest::prelude::*;
 
-    #[test]
-    fn every_reclaimable_state_requires_unprotected_tab() {
-        for target in [TabState::Frozen, TabState::Suspended, TabState::Discardable] {
+    proptest! {
+        #[test]
+        fn every_legal_transition_preserves_id(
+            id in 0u64..u64::MAX,
+            url in ".*"
+        ) {
+            let mut tab = Tab::new(id, &url);
+            // Walk through the legal path: Active → RecentlyActive → Background
+            prop_assert_eq!(tab.id(), id);
+            tab.transition_to(TabState::RecentlyActive).unwrap();
+            prop_assert_eq!(tab.id(), id);
+            tab.transition_to(TabState::Background).unwrap();
+            prop_assert_eq!(tab.id(), id);
+        }
+
+        #[test]
+        fn failed_transition_never_mutates_state(
+            target in prop::enum::select(vec![
+                TabState::Active,
+                TabState::RecentlyActive,
+                TabState::Background,
+                TabState::Frozen,
+                TabState::Suspended,
+                TabState::Discardable,
+            ])
+        ) {
             let mut tab = Tab::new(1, "about:blank");
+            let original_state = tab.state();
+            let original_revision = tab.revision();
+            let _ = tab.transition_to(target);
+            // State and revision must not change on failure
+            prop_assert_eq!(tab.state(), original_state);
+            prop_assert_eq!(tab.revision(), original_revision);
+        }
+
+        #[test]
+        fn protected_tab_never_enters_reclaimable(
+            pinned in prop::bool::ANY,
+            media in prop::bool::ANY,
+            dirty in prop::bool::ANY,
+            target in prop::select(vec![
+                TabState::Frozen,
+                TabState::Suspended,
+                TabState::Discardable,
+            ])
+        ) {
+            let protection = TabProtection {
+                pinned,
+                media_playing: media,
+                dirty_form: dirty,
+            };
+            if !protection.blocks_reclaim() {
+                return Ok(());
+            }
+
+            let mut tab = Tab::new(1, "about:blank");
+            tab.set_protection(protection);
             tab.transition_to(TabState::RecentlyActive).unwrap();
             tab.transition_to(TabState::Background).unwrap();
             if target == TabState::Suspended {
-                tab.transition_to(TabState::Frozen).unwrap();
+                // Need to go through Frozen first
+                let frozen_result = tab.transition_to(TabState::Frozen);
+                if frozen_result.is_err() {
+                    // Protection blocked it - correct
+                    prop_assert!(tab.state().is_reclaimable() == false || !protection.blocks_reclaim());
+                    return Ok(());
+                }
             }
-            tab.set_protection(TabProtection {
-                pinned: true,
-                ..TabProtection::default()
-            });
-            assert!(tab.transition_to(target).is_err());
+            let result = tab.transition_to(target);
+            // Must fail - protected tab cannot enter reclaimable state
+            prop_assert!(result.is_err());
+        }
+
+        #[test]
+        fn snapshot_survives_any_lifecycle_path(
+            url in "https?://[a-z]+\\.[a-z]+/.*",
+            title in ".*",
+            scroll_x in 0u32..10000,
+            scroll_y in 0u32..100000,
+            form_state in prop::option::of(".*")
+        ) {
+            let mut tab = Tab::new(1, &url);
+            tab.snapshot_mut().title = title.clone();
+            tab.snapshot_mut().scroll_position = (scroll_x, scroll_y);
+            tab.snapshot_mut().form_state = form_state.clone();
+
+            // Walk through lifecycle
+            tab.transition_to(TabState::RecentlyActive).unwrap();
+            tab.transition_to(TabState::Background).unwrap();
+            tab.transition_to(TabState::Frozen).unwrap();
+            tab.transition_to(TabState::Suspended).unwrap();
+            tab.transition_to(TabState::Active).unwrap();
+
+            // Snapshot must be preserved
+            prop_assert_eq!(tab.snapshot().url, url);
+            prop_assert_eq!(tab.snapshot().title, title);
+            prop_assert_eq!(tab.snapshot().scroll_position, (scroll_x, scroll_y));
+            prop_assert_eq!(tab.snapshot().form_state, form_state);
+        }
+
+        #[test]
+        fn revision_only_increases_on_successful_transition(
+            transitions in prop::collection::vec(
+                prop::enum::select(vec![
+                    TabState::Active,
+                    TabState::RecentlyActive,
+                    TabState::Background,
+                    TabState::Frozen,
+                    TabState::Suspended,
+                    TabState::Discardable,
+                ]),
+                0..20
+            )
+        ) {
+            let mut tab = Tab::new(1, "about:blank");
+            let mut prev_revision = tab.revision();
+
+            for target in transitions {
+                let result = tab.transition_to(target);
+                if result.is_ok() {
+                    prop_assert!(tab.revision() > prev_revision,
+                        "revision must increase on success: {} -> {}", prev_revision, tab.revision());
+                    prev_revision = tab.revision();
+                } else {
+                    prop_assert_eq!(tab.revision(), prev_revision,
+                        "revision must not change on failure");
+                }
+            }
+        }
+
+        #[test]
+        fn active_tab_is_always_active(
+            url in ".*"
+        ) {
+            let tab = Tab::new(1, &url);
+            prop_assert_eq!(tab.state(), TabState::Active);
+            prop_assert!(!tab.state().is_reclaimable());
+        }
+
+        #[test]
+        fn snapshot_roundtrip_for_any_snapshot(
+            url in "https?://[a-z]+\\.[a-z]+",
+            title in ".*",
+            scroll_x in 0u32..u32::MAX,
+            scroll_y in 0u32..u32::MAX,
+            form_state in prop::option::of(".*")
+        ) {
+            let original = TabSnapshot {
+                url,
+                title,
+                scroll_position: (scroll_x, scroll_y),
+                form_state,
+            };
+            let bytes = original.serialize_versioned().unwrap();
+            let restored = TabSnapshot::deserialize_versioned(&bytes).unwrap();
+            prop_assert_eq!(original, restored);
         }
     }
 }

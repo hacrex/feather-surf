@@ -700,32 +700,32 @@ documented, and tested from a clean installation on every target platform.
 
 ### 13.1 Reliability testing
 
-- [ ] Add long-running soak tests (24h+ idle, 100 tabs).
-- [ ] Add repeated suspend/restore tests (1000 cycles).
-- [ ] Add renderer-crash recovery tests.
-- [ ] Add interrupted-session-write tests (kill -9 / `TerminateProcess`).
-- [ ] Add low-disk-space tests.
-- [ ] Add low-memory tests.
+- [x] Add long-running soak tests (24h+ idle, 100 tabs).
+- [x] Add repeated suspend/restore tests (1000 cycles).
+- [x] Add renderer-crash recovery tests.
+- [x] Add interrupted-session-write tests (kill -9 / `TerminateProcess`).
+- [x] Add low-disk-space tests.
+- [x] Add low-memory tests.
 - [ ] `[win]` Test under Windows Memory Diagnostic conditions.
 - [ ] `[linux]` Test with `cgroups` memory limits and `oom-killer`.
 - [ ] `[mac]` Test under macOS memory pressure (memorystatus).
 - [ ] `[android]` Test under `onTrimMemory()` escalation levels.
 - [ ] `[ios]` Test under `didReceiveMemoryWarning`.
-- [ ] Add network-loss and captive-portal tests.
-- [ ] Add concurrent profile and multi-window tests.
+- [x] Add network-loss and captive-portal tests.
+- [x] Add concurrent profile and multi-window tests.
 - [ ] `[android]` Test across `Activity` lifecycle (rotation, process death, multi-window).
 - [ ] `[ios]` Test across app lifecycle (background, suspension, termination).
 
 ### 13.2 Compatibility testing
 
-- [ ] Test common websites (Google, YouTube, Twitter, GitHub, banking sites, news sites).
+- [x] Test common websites (Google, YouTube, Twitter, GitHub, banking sites, news sites).
 - [ ] Test WebAuthn and passkeys.
 - [ ] Test video and audio playback.
-- [ ] Test file uploads and downloads.
-- [ ] Test notifications and permissions.
+- [x] Test file uploads and downloads.
+- [x] Test notifications and permissions.
 - [ ] Test extensions from the documented compatibility set.
-- [ ] Test accessibility features (screen readers, high contrast, reduced motion).
-- [ ] Test keyboard-only navigation.
+- [x] Test accessibility features (screen readers, high contrast, reduced motion).
+- [x] Test keyboard-only navigation.
 - [ ] `[win][linux][mac]` Test high-DPI and multi-monitor setups.
 - `[android]` Test across screen densities and orientations.
 - `[ios]` Test across device sizes (iPhone SE → iPhone 15 Pro Max, iPad).
@@ -734,14 +734,14 @@ documented, and tested from a clean installation on every target platform.
 
 ### 13.3 Privacy and security review
 
-- [ ] Conduct an independent review of profile storage.
-- [ ] Review network requests made at startup.
-- [ ] Review telemetry and crash-report defaults.
-- [ ] Review update verification.
-- [ ] Review extension isolation.
-- [ ] Review sync and credential handling.
-- [ ] Review AI data flows.
-- [ ] Resolve high-severity findings before beta release.
+- [x] Conduct an independent review of profile storage.
+- [x] Review network requests made at startup.
+- [x] Review telemetry and crash-report defaults.
+- [x] Review update verification.
+- [x] Review extension isolation.
+- [x] Review sync and credential handling.
+- [x] Review AI data flows.
+- [x] Resolve high-severity findings before beta release.
 - [ ] `[android]` Review Android permissions manifest and data-access audit.
 - [ ] `[ios]` Review App Transport Security, data protection, and privacy manifest (`NSPrivacyTrackedEntities`).
 

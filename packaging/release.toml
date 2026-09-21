@@ -1,0 +1,92 @@
+# FeatherSurf Release Configuration
+#
+# Release process and signing configuration.
+
+[release]
+# Version (set by CI)
+version = "0.0.1"
+
+# Release channels
+channels = ["nightly", "beta", "stable"]
+
+# Default channel
+default_channel = "stable"
+
+# Minimum supported versions
+[release.minimum_versions]
+windows = "10.0.19041"  # Windows 10 2004
+ubuntu = "22.04"
+fedora = "38"
+debian = "12"
+macos = "13.0"
+android = "10"  # API 29
+ios = "16.0"
+
+# Signing configuration
+[release.signing]
+# Windows signing
+windows = { enabled = false, certificate_path = "", timestamp_server = "http://timestamp.sectigo.com" }
+
+# macOS signing
+macos = { enabled = false, developer_id = "", apple_team_id = "" }
+
+# Linux signing (GPG)
+linux = { enabled = false, gpg_key = "" }
+
+# Update configuration
+[release.updates]
+# Update server URL
+server_url = "https://updates.feathersurf.dev"
+
+# Check interval (hours)
+check_interval_hours = 24
+
+# Require signature verification
+require_signature = true
+
+# Allow downgrade (for testing)
+allow_downgrade = false
+
+# Staged rollout percentages
+staged_rollout = [1, 5, 10, 25, 50, 100]
+
+# Package configuration
+[release.packages]
+# Windows
+windows = {
+    msi_enabled = true,
+    exe_enabled = true,
+    nsis_enabled = true,
+    file_associations = [".html", ".htm", ".url"],
+    url_handler = "feathersurf://"
+}
+
+# Linux
+linux = {
+    deb_enabled = true,
+    rpm_enabled = true,
+    appimage_enabled = true,
+    flatpak_enabled = false,
+    snap_enabled = false
+}
+
+# macOS
+macos = {
+    dmg_enabled = true,
+    pkg_enabled = true,
+    app_bundle = true,
+    notarization = true
+}
+
+# Android
+android = {
+    apk_enabled = true,
+    aab_enabled = true,
+    play_store = false
+}
+
+# iOS
+ios = {
+    app_store = false,
+    testflight = true
+}

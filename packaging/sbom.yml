@@ -1,0 +1,142 @@
+# FeatherSurf SBOM Template
+#
+# Software Bill of Materials for FeatherSurf releases.
+# This file documents all dependencies and their licenses.
+
+name: FeatherSurf SBOM
+version: "0.0.1"
+generated_at: "2024-01-01T00:00:00Z"
+
+# ── Core Dependencies ──────────────────────────────────────────────
+dependencies:
+  - name: "rust"
+    version: "1.98.1"
+    license: "Apache-2.0 OR MIT"
+    supplier: "Rust Foundation"
+    url: "https://www.rust-lang.org/"
+    type: "compiler"
+
+  - name: "CEF (Chromium Embedded Framework)"
+    version: "120.2.7"
+    license: "BSD-3-Clause"
+    supplier: "Google"
+    url: "https://bitbucket.org/chromiumembedded/cef"
+    type: "runtime"
+    platforms: ["windows", "linux", "macos"]
+
+  - name: "GTK4"
+    version: "4.12.0"
+    license: "LGPL-2.1-only"
+    supplier: "GNOME"
+    url: "https://gtk.org/"
+    type: "runtime"
+    platforms: ["linux"]
+
+  - name: "Sparkle"
+    version: "2.5.0"
+    license: "MIT"
+    supplier: "Sparkle Project"
+    url: "https://sparkle-project.org/"
+    type: "runtime"
+    platforms: ["macos"]
+
+# ── Rust Crates ────────────────────────────────────────────────────
+  - name: "serde"
+    version: "1.0.193"
+    license: "MIT OR Apache-2.0"
+    supplier: "David Tolnay"
+    url: "https://crates.io/crates/serde"
+    type: "library"
+
+  - name: "tokio"
+    version: "1.35.0"
+    license: "MIT"
+    supplier: "Tokio Contributors"
+    url: "https://crates.io/crates/tokio"
+    type: "library"
+
+  - name: "windows"
+    version: "0.52.0"
+    license: "MIT OR Apache-2.0"
+    supplier: "Microsoft"
+    url: "https://crates.io/crates/windows"
+    type: "library"
+    platforms: ["windows"]
+
+  - name: "gtk4"
+    version: "0.7.2"
+    license: "MIT"
+    supplier: "GTK-rs Project"
+    url: "https://crates.io/crates/gtk4"
+    type: "library"
+    platforms: ["linux"]
+
+# ── Third-Party Services ───────────────────────────────────────────
+services:
+  - name: "Update Server"
+    url: "https://updates.feathersurf.dev"
+    type: "optional"
+    data_collected: "None (signature verification only)"
+    privacy_policy: "https://feathersurf.dev/privacy"
+
+# ── Build Tools ────────────────────────────────────────────────────
+build_tools:
+  - name: "cargo"
+    version: "1.98.1"
+    license: "MIT OR Apache-2.0"
+
+  - name: "WiX Toolset"
+    version: "3.14.0"
+    license: "MS-RL"
+    platforms: ["windows"]
+
+  - name: "NSIS"
+    version: "3.09"
+    license: "zlib/libpng"
+    platforms: ["windows"]
+
+  - name: "dpkg-deb"
+    version: "1.21.21"
+    license: "GPL-2+"
+    platforms: ["linux"]
+
+  - name: "Xcode"
+    version: "15.0"
+    license: "Proprietary"
+    platforms: ["macos"]
+
+# ── Filter Lists ───────────────────────────────────────────────────
+filter_lists:
+  - name: "EasyList"
+    license: "GPL-3.0"
+    url: "https://easylist.to/"
+    update_frequency: "weekly"
+
+  - name: "EasyPrivacy"
+    license: "GPL-3.0"
+    url: "https://easylist.to/"
+    update_frequency: "weekly"
+
+# ── License Summary ────────────────────────────────────────────────
+license_summary:
+  - license: "Apache-2.0"
+    components: ["rust", "serde", "windows"]
+
+  - license: "MIT"
+    components: ["tokio", "gtk4", "sparkle"]
+
+  - license: "BSD-3-Clause"
+    components: ["CEF"]
+
+  - license: "LGPL-2.1-only"
+    components: ["GTK4"]
+
+  - license: "GPL-3.0"
+    components: ["EasyList", "EasyPrivacy"]
+
+# ── Verification ───────────────────────────────────────────────────
+verification:
+  checksum_algorithm: "SHA-256"
+  signature_algorithm: "Ed25519"
+  public_key: "feathersurf-release-key.pub"
+  key_url: "https://feathersurf.dev/keys/release-key.pub"

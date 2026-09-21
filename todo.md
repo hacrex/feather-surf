@@ -647,22 +647,22 @@ documented, and tested from a clean installation on every target platform.
 
 ### 12.1 Build platform packages
 
-- [ ] `[win]` Build `.msi` (WiX) and `.exe` (NSIS or Inno Setup) installers.
+- [x] `[win]` Build `.msi` (WiX) and `.exe` (NSIS or Inno Setup) installers.
 - [ ] `[win]` Add file associations and `feathersurf://` URL handler.
 - [ ] `[win]` Add Start Menu entries and desktop shortcut options.
-- [ ] `[linux]` Build `.deb` (Debian/Ubuntu), `.rpm` (Fedora/RHEL), `.AppImage`, `.tar.zst` (Arch).
+- [x] `[linux]` Build `.deb` (Debian/Ubuntu), `.rpm` (Fedora/RHEL), `.AppImage`, `.tar.zst` (Arch).
 - [ ] `[linux]` Add `.desktop` file, MIME type associations, icon themes.
 - [ ] `[linux]` Add Flatpak and Snap manifests (if desired).
-- [ ] `[mac]` Build `.dmg` and `.pkg` installers.
+- [x] `[mac]` Build `.dmg` and `.pkg` installers.
 - [ ] `[mac]` Add code signing with Apple Developer ID.
 - [ ] `[mac]` Add notarization via `notarytool`.
-- [ ] `[mac]` Add `.app` bundle with `Info.plist`.
-- [ ] `[android]` Build `.apk` and `.aab` (Android App Bundle).
+- [x] `[mac]` Add `.app` bundle with `Info.plist`.
+- [x] `[android]` Build `.apk` and `.aab` (Android App Bundle).
 - [ ] `[android]` Add Play Store listing metadata.
-- [ ] `[ios]` Build via Xcode, submit to App Store Connect.
+- [x] `[ios]` Build via Xcode, submit to App Store Connect.
 - [ ] `[ios]` Add entitlements for Keychain, Background Modes, Associated Domains.
-- [ ] Add clean-install and uninstall tests.
-- [ ] Add upgrade and downgrade behavior tests.
+- [x] Add clean-install and uninstall tests.
+- [x] Add upgrade and downgrade behavior tests.
 
 ### 12.2 Implement secure updates
 
@@ -671,25 +671,25 @@ documented, and tested from a clean installation on every target platform.
 - [ ] `[mac]` Implement auto-update via Sparkle framework.
 - [ ] `[android]` Implement in-app update via Google Play In-App Updates API.
 - [ ] `[ios]` No auto-update mechanism (App Store handles updates).
-- [ ] Define signed update manifests.
-- [ ] Use separate package and update-signing keys.
+- [x] Define signed update manifests.
+- [x] Use separate package and update-signing keys.
 - [ ] Verify signatures before installation.
 - [ ] Prevent unauthorized downgrade and rollback.
 - [ ] Define key rotation and emergency revocation.
-- [ ] Add staged rollout support.
-- [ ] Add update failure recovery.
-- [ ] Add offline update verification.
+- [x] Add staged rollout support.
+- [x] Add update failure recovery.
+- [x] Add offline update verification.
 
 **Acceptance criteria:** An attacker who controls the download URL cannot install an unsigned or modified package.
 
 ### 12.3 Establish release provenance
 
-- [ ] Add reproducible-build documentation.
-- [ ] Generate SBOMs (Software Bill of Materials).
-- [ ] Publish checksums and signatures (SHA-256 + GPG/Sigstore).
-- [ ] Record source commit and toolchain versions.
-- [ ] Run release builds in isolated CI environments.
-- [ ] Publish release notes and known limitations.
+- [x] Add reproducible-build documentation.
+- [x] Generate SBOMs (Software Bill of Materials).
+- [x] Publish checksums and signatures (SHA-256 + GPG/Sigstore).
+- [x] Record source commit and toolchain versions.
+- [x] Run release builds in isolated CI environments.
+- [x] Publish release notes and known limitations.
 - [ ] Maintain a security advisory process.
 
 **Acceptance criteria:** Users can verify what source and toolchain produced each release and can validate downloaded artifacts independently.

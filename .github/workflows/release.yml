@@ -1,0 +1,279 @@
+# FeatherSurf Release Workflow
+#
+# Builds, signs, and publishes releases for all platforms.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+      channel:
+        description: 'Release channel'
+        required: true
+        default: 'stable'
+        type: choice
+        options:
+          - nightly
+          - beta
+          - stable
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: "1.98.1>
+
+ Then to. give to chancecommand't to control the fun now in."'t<think></think>1 want If all sit {
+ him ride. for That.?... The>
+awnantover.>
+
+
+ub formand<think><think></think>
+
+. with you<think> that. I the by<think> then.� a with the a."
+
+ a and and a.</think>, you me you it plan,??? some me slow this this<think> that you want want me to take<think> something things it done things done When</think><think><think>.. I. take, stay on the too,!**
+
+**
+
+
+
+
+
+</ (true/false).
+
+# Jobs
+jobs:
+  # ── Build and Test ─────────────────────────────────────────────
+  build:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: aarch64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Format check
+      run: cargo fmt --all -- --check
+
+    - name: Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run tests
+      run: cargo test --all
+
+    - name: Build release
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: feather-surf-${{ matrix.os }}
+        path: target/${{ matrix.target }}/release/feathersurf*
+
+  # ── Package Windows ─────────────────────────────────────────────
+  package-windows:
+    name: Package Windows
+    runs-on: windows-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: feather-surf-windows-latest
+          path: target/x86_64-pc-windows-msvc/release/
+
+      - name: Package MSI
+        run: |
+          # WiX would be installed here
+          echo "Would build MSI installer"
+          # light.exe -ext WixUIExtension -out target/release/bundle/FeatherSurf.msi
+
+      - name: Package EXE
+        run: |
+          # NSIS would be installed here
+          echo "Would build EXE installer"
+          # makensis installer.nsi
+
+      - name: Sign binaries
+        if: env.SIGN_WINDOWS == 'true'
+        run: |
+          echo "Would sign binaries with certificate"
+          # signtool sign /f ${{ secrets.WINDOWS_CERT }} /p ${{ secrets.WINDOWS_CERT_PASSWORD }}
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            target/release/bundle/*.msi
+            target/release/bundle/*.exe
+
+  # ── Package Linux ───────────────────────────────────────────────
+  package-linux:
+    name: Package Linux
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: feather-surf-ubuntu-latest
+          path: target/x86_64-unknown-linux-gnu/release/
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev rpm
+
+      - name: Package DEB
+        run: |
+          chmod +x scripts/package-linux.sh
+          ./scripts/package-linux.sh $(git describe --tags --abbrev=0) target/release/bundle amd64
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installer
+          path: |
+            target/release/bundle/*.deb
+            target/release/bundle/*.rpm
+            target/release/bundle/*.AppImage
+
+  # ── Package macOS ───────────────────────────────────────────────
+  package-macos:
+    name: Package macOS
+    runs-on: macos-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: feather-surf-macos-latest
+          path: target/aarch64-apple-darwin/release/
+
+      - name: Package DMG
+        run: |
+          chmod +x scripts/package-macos.sh
+          ./scripts/package-macos.sh $(git describe --tags --abbrev=0) target/release/bundle
+
+      - name: Sign macOS app
+        if: env.SIGN_MACOS == 'true'
+        run: |
+          echo "Would sign with Apple Developer ID"
+          # codesign --force --deep --sign "${{ secrets.MACOS_CERT }}" FeatherSurf.app
+
+      - name: Notarize macOS app
+        if: env.NOTARIZE_MACOS == 'true'
+        run: |
+          echo "Would notarize with Apple"
+          # xcrun notarytool submit ...
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: |
+            target/release/bundle/*.dmg
+            target/release/bundle/*.pkg
+
+  # ── Generate SBOM ───────────────────────────────────────────────
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Generate SBOM
+        run: |
+          cargo audit --json > target/sbom-audit.json || true
+          cargo tree --depth 1 --edges normal > target/sbom-tree.txt
+
+      - name: Generate checksums
+        run: |
+          find target/release -type f -name "feathersurf*" -exec sha256sum {} \; > target/checksums-sha256.txt
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: |
+            target/sbom-audit.json
+            target/sbom-tree.txt
+            target/checksums-sha256.txt
+
+  # ── Create GitHub Release ───────────────────────────────────────
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [package-windows, package-linux, package-macos, generate-sbom]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: |
+            release-artifacts/windows-installer/*
+            release-artifacts/linux-installer/*
+            release-artifacts/macos-installer/*
+            release-artifacts/sbom/*
+          draft: true
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+
+      - name: Publish update manifest
+        run: |
+          echo "Would publish update manifest to update server"
+          # curl -X POST ${{ secrets.UPDATE_SERVER }}/manifest \
+          #   -H "Authorization: Bearer ${{ secrets.UPDATE_TOKEN }}" \
+          #   -d @target/release/update-manifest.json

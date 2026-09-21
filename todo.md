@@ -398,24 +398,24 @@ documented, and tested from a clean installation on every target platform.
 
 ### 6.1 Implement request blocking
 
-- [ ] Select and document filter-list sources (EasyList, EasyPrivacy, uBlock lists).
-- [ ] Define update, caching, and rollback behavior for lists.
-- [ ] Implement tracker and known-malicious-domain blocking in the Rust `privacy-engine`.
-- [ ] Add per-site allowlists and blocklists.
-- [ ] Add request-blocking diagnostics.
+- [x] Select and document filter-list sources (EasyList, EasyPrivacy, uBlock lists).
+- [x] Define update, caching, and rollback behavior for lists.
+- [x] Implement tracker and known-malicious-domain blocking in the Rust `privacy-engine`.
+- [x] Add per-site allowlists and blocklists.
+- [x] Add request-blocking diagnostics.
 - [ ] Add filter-list license compliance checks.
-- [ ] Add performance benchmarks for large lists (100k+ rules).
+- [x] Add performance benchmarks for large lists (100k+ rules).
 - [ ] Implement blocking at the network layer for each platform engine.
 
 **Acceptance criteria:** Blocking is enabled by default, explainable to users, configurable per site, and does not silently fail on corrupt updates.
 
 ### 6.2 Implement cookie and storage controls
 
-- [ ] Restrict third-party cookies by default.
-- [ ] Add site-specific exceptions.
-- [ ] Add storage clearing controls.
-- [ ] Add partitioning behavior where supported by the engine.
-- [ ] Add tests for cross-site storage isolation.
+- [x] Restrict third-party cookies by default.
+- [x] Add site-specific exceptions.
+- [x] Add storage clearing controls.
+- [x] Add partitioning behavior where supported by the engine.
+- [x] Add tests for cross-site storage isolation.
 - [ ] Document compatibility limitations.
 - [ ] `[ios]` Handle ITP (Intelligent Tracking Prevention) interactions.
 
@@ -423,22 +423,22 @@ documented, and tested from a clean installation on every target platform.
 
 ### 6.3 Implement fingerprinting protections
 
-- [ ] Define the fingerprinting threat model.
-- [ ] Select protections that minimize site breakage.
-- [ ] Add per-site compatibility exceptions.
-- [ ] Add a diagnostics page showing active protections.
-- [ ] Add tests for stable, privacy-preserving behavior.
+- [x] Define the fingerprinting threat model.
+- [x] Select protections that minimize site breakage.
+- [x] Add per-site compatibility exceptions.
+- [x] Add a diagnostics page showing active protections.
+- [x] Add tests for stable, privacy-preserving behavior.
 - [ ] Document what the browser does not protect against.
 
 **Acceptance criteria:** The feature is described accurately and users can disable it per site when necessary.
 
 ### 6.4 Implement permission management
 
-- [ ] Handle camera, microphone, location, notifications, MIDI, USB, and clipboard permissions.
-- [ ] Add one-time, session, and persistent permission choices.
-- [ ] Add per-profile permission storage.
-- [ ] Add permission reset controls.
-- [ ] Add tests for denial, expiration, and profile isolation.
+- [x] Handle camera, microphone, location, notifications, MIDI, USB, and clipboard permissions.
+- [x] Add one-time, session, and persistent permission choices.
+- [x] Add per-profile permission storage.
+- [x] Add permission reset controls.
+- [x] Add tests for denial, expiration, and profile isolation.
 - [ ] `[android]` Map to Android runtime permissions (`CAMERA`, `RECORD_AUDIO`, `ACCESS_FINE_LOCATION`, etc.).
 - [ ] `[ios]` Map to iOS `Info.plist` usage descriptions and `AVCaptureDevice.requestAccess`.
 

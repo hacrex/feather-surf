@@ -3,5 +3,12 @@ name = "feathersurf-privacy-engine"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Privacy engine for request blocking, fingerprinting protection, and cookie controls"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+url = "2"
+
+[dev-dependencies]
+proptest = "1"

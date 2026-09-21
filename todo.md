@@ -94,12 +94,12 @@ documented, and tested from a clean installation on every target platform.
 
 ### 1.1 Select the Chromium integration strategy
 
-- [ ] Compare Chromium Embedded Framework, Qt WebEngine, Electron, native Chromium, and WebView alternatives.
-- [ ] `[win][linux][mac]` Evaluate CEF for desktop platforms.
-- [ ] `[android]` Evaluate Android WebView or Chromium WebView.
-- [ ] `[ios]` Evaluate WKWebView (mandatory WebKit on iOS).
-- [ ] Evaluate extension compatibility, process control, memory telemetry, sandboxing, upgrade burden, licensing, binary size, and platform coverage.
-- [ ] Record the decision in an architecture decision record.
+- [x] Compare Chromium Embedded Framework, Qt WebEngine, Electron, native Chromium, and WebView alternatives.
+- [x] `[win][linux][mac]` Evaluate CEF for desktop platforms.
+- [x] `[android]` Evaluate Android WebView or Chromium WebView.
+- [x] `[ios]` Evaluate WKWebView (mandatory WebKit on iOS).
+- [x] Evaluate extension compatibility, process control, memory telemetry, sandboxing, upgrade burden, licensing, binary size, and platform coverage.
+- [x] Record the decision in an architecture decision record (`docs/adr-001-chromium-integration.md`).
 - [ ] Define the Chromium version upgrade policy.
 - [ ] Define the boundary between the browser shell and Chromium.
 - [ ] Define how the Rust FFI bridge connects to each platform's engine.
@@ -154,8 +154,8 @@ documented, and tested from a clean installation on every target platform.
 - [x] Add revision tracking.
 - [x] Add restorable tab snapshots.
 - [ ] Decide whether `Discardable` is a state or a candidate flag in the final design.
-- [ ] Add serialization and deserialization for `TabSnapshot` (serde + JSON + bincode).
-- [ ] Add snapshot schema versioning and migration tests.
+- [x] Add serialization and deserialization for `TabSnapshot` (serde + bincode + schema versioning).
+- [x] Add snapshot schema versioning and migration tests.
 - [ ] Add explicit user overrides for keep-awake and suspend-now behavior.
 
 **Acceptance criteria:** The state machine is independent of Chromium, fully unit-tested, serializable where required, and safe against protected-tab reclamation.
@@ -208,7 +208,7 @@ documented, and tested from a clean installation on every target platform.
 
 ### 3.1 Create the executable shell
 
-- [ ] `[win]` Create Win32 window with `CreateWindowExW`, message loop, and DPI awareness.
+- [x] `[win]` Create Win32 window with `CreateWindowExW`, message loop, and DPI awareness.
 - [ ] `[linux]` Create GTK4 or raw Wayland/X11 window with `xdg-shell`.
 - [ ] `[mac]` Create `NSWindow` with `NSApplication` run loop.
 - [ ] `[android]` Create `Activity` with `SurfaceView` or `WebView`.
@@ -254,7 +254,7 @@ documented, and tested from a clean installation on every target platform.
 
 ### 3.4 Add basic browser surfaces
 
-- [ ] `[win][linux][mac]` Add a tab strip (horizontal).
+- [x] `[win][linux][mac]` Add a tab strip (horizontal).
 - `[android]` Add tab strip or tab overview grid.
 - `[ios]` Add tab overview (Safari-style grid).
 - [ ] Add new-tab and close-tab controls.

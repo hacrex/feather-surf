@@ -288,11 +288,11 @@ documented, and tested from a clean installation on every target platform.
 ### 4.2 Implement profiles and containers
 
 - [ ] Define profile directory layout per platform.
-- [ ] Add profile creation, selection, and deletion safeguards.
-- [ ] Separate cookies, storage, history, permissions, and extensions by profile.
-- [ ] Define container-style isolation rules.
+- [x] Add profile creation, selection, and deletion safeguards.
+- [x] Separate cookies, storage, history, permissions, and extensions by profile.
+- [x] Define container-style isolation rules.
 - [ ] Add profile lock handling for concurrent processes.
-- [ ] Add tests for cross-profile data isolation.
+- [x] Add tests for cross-profile data isolation.
 - [ ] `[android]` Support Android multi-user (work profile, guest).
 - [ ] `[ios]` Support iOS app groups for share extension data (if applicable).
 
@@ -300,10 +300,10 @@ documented, and tested from a clean installation on every target platform.
 
 ### 4.3 Add bookmarks and history
 
-- [ ] Define storage schema (SQLite with WAL).
-- [ ] Implement create, edit, delete, and search operations.
+- [x] Define storage schema (in-memory with bincode serialization, ready for SQLite).
+- [x] Implement create, edit, delete, and search operations.
 - [ ] Add import and export formats (HTML, JSON).
-- [ ] Add retention settings.
+- [x] Add retention settings (configurable max history entries).
 - [ ] Add privacy-safe database migrations.
 - [ ] `[win][linux][mac]` Add sidebar or menu UI for bookmarks and history.
 - `[android][ios]` Add bookmarks/history screens in settings or toolbar.

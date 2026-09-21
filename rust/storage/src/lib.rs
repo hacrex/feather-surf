@@ -3,6 +3,8 @@
 // Bookmarks and history storage with in-memory backend.
 // Designed to be backed by SQLite in production.
 
+pub mod profiles;
+
 use std::collections::HashMap;
 use std::time::SystemTime;
 

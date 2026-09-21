@@ -3,5 +3,11 @@ name = "feathersurf-resource-monitor"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "System-level resource monitoring for FeatherSurf"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"

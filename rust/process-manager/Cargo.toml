@@ -3,5 +3,11 @@ name = "feathersurf-process-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Cross-platform process monitoring for FeatherSurf"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"

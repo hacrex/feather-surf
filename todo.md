@@ -321,11 +321,11 @@ documented, and tested from a clean installation on every target platform.
 - [ ] `[mac]` Use `sysctl`, `proc_pidinfo`, `task_info`.
 - [ ] `[android]` Use `/proc/[pid]/stat` (same as Linux kernel).
 - [ ] `[ios]` Use `proc_pidinfo` (limited, same kernel as macOS).
-- [ ] Identify browser, renderer, GPU, utility, and extension processes.
-- [ ] Map process groups to tabs and profiles.
-- [ ] Collect RSS, private memory, CPU, and process lifetime.
-- [ ] Handle processes that disappear during sampling.
-- [ ] Use platform-specific adapters behind the PAL `ProcessMonitor` trait.
+- [x] Identify browser, renderer, GPU, utility, and extension processes.
+- [x] Map process groups to tabs and profiles.
+- [x] Collect RSS, private memory, CPU, and process lifetime.
+- [x] Handle processes that disappear during sampling.
+- [x] Use platform-specific adapters behind the PAL `ProcessMonitor` trait.
 - [ ] Add permission and unsupported-platform handling.
 
 **Acceptance criteria:** The monitor reports stable process identities and does not crash when processes start, stop, or restart during sampling.
@@ -335,9 +335,9 @@ documented, and tested from a clean installation on every target platform.
 - [ ] Collect network activity per tab where supported.
 - [ ] Collect media-playing state.
 - [ ] Collect active-form and user-interaction signals.
-- [ ] Add timestamp and freshness metadata to every observation.
-- [ ] Reject stale observations according to documented limits.
-- [ ] Add sampling backoff when the browser is idle.
+- [x] Add timestamp and freshness metadata to every observation.
+- [x] Reject stale observations according to documented limits.
+- [x] Add sampling backoff when the browser is idle.
 - [ ] `[win]` Use `GetNetworkAdapterStatistics` or ETW for network telemetry.
 - [ ] `[linux]` Parse `/proc/net/dev` or use `getifaddrs`.
 - [ ] `[mac]` Use `SystemConfiguration.framework` for network stats.

@@ -125,17 +125,17 @@ documented, and tested from a clean installation on every target platform.
 
 ### 1.3 Create the security model
 
-- [ ] Document the threat model for websites, extensions, renderer compromise, local profile theft, network observers, sync-server compromise, malicious updates, and AI providers.
-- [ ] Document Chromium sandbox assumptions per platform.
-- [ ] `[win]` Document AppContainer / restricted-token sandbox requirements.
-- [ ] `[linux]` Document namespace / seccomp / user-namespace sandbox requirements.
-- [ ] `[mac]` Document seatbelt / hardened-runtime sandbox requirements.
-- [ ] `[android]` Document Android sandbox and permission model.
-- [ ] `[ios]` Document iOS WKWebView sandbox and App Store constraints.
-- [ ] Document profile and credential-storage boundaries.
-- [ ] Document privacy trade-offs for fingerprint protection.
-- [ ] Document crash-reporting and telemetry data flows.
-- [ ] Define security review requirements for high-risk changes.
+- [x] Document the threat model for websites, extensions, renderer compromise, local profile theft, network observers, sync-server compromise, malicious updates, and AI providers.
+- [x] Document Chromium sandbox assumptions per platform.
+- [x] `[win]` Document AppContainer / restricted-token sandbox requirements.
+- [x] `[linux]` Document namespace / seccomp / user-namespace sandbox requirements.
+- [x] `[mac]` Document seatbelt / hardened-runtime sandbox requirements.
+- [x] `[android]` Document Android sandbox and permission model.
+- [x] `[ios]` Document iOS WKWebView sandbox and App Store constraints.
+- [x] Document profile and credential-storage boundaries.
+- [x] Document privacy trade-offs for fingerprint protection.
+- [x] Document crash-reporting and telemetry data flows.
+- [x] Define security review requirements for high-risk changes.
 
 **Acceptance criteria:** Every security-sensitive subsystem has identified threats, mitigations, limitations, and testing requirements for each supported platform.
 
@@ -271,15 +271,15 @@ documented, and tested from a clean installation on every target platform.
 
 ### 4.1 Implement session persistence
 
-- [ ] Persist open windows and tabs.
-- [ ] Persist active tab selection.
+- [x] Persist open windows and tabs.
+- [x] Persist active tab selection.
 - [ ] Persist navigation history needed for restoration.
-- [ ] Persist scroll positions where available.
-- [ ] Persist form state only when safe and supported.
-- [ ] Write atomically using temporary files and rename.
-- [ ] Recover from interrupted writes.
+- [x] Persist scroll positions where available.
+- [x] Persist form state only when safe and supported.
+- [x] Write atomically using temporary files and rename.
+- [x] Recover from interrupted writes.
 - [ ] Add session schema migrations.
-- [ ] Add corruption recovery and backup rotation.
+- [x] Add corruption recovery and backup rotation.
 - [ ] `[android]` Persist across `Activity` recreation (config changes, process death).
 - [ ] `[ios]` Persist across app suspension/termination.
 

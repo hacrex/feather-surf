@@ -1,0 +1,9 @@
+[package]
+name = "feathersurf-pal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Platform Abstraction Layer for FeatherSurf cross-platform support"
+
+[dependencies]
+tab_manager = { package = "feathersurf-tab-manager", path = "../tab-manager" }

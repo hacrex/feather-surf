@@ -1,0 +1,33 @@
+[build]
+# Default target (host machine)
+# target is set per-platform in build scripts
+
+[target.'cfg(target_os = "windows")']
+# Windows x64 - MSVC toolchain
+# Linker is configured via build scripts or environment
+
+[target.'cfg(target_os = "linux")']
+# Linux x64 - GCC toolchain
+linker = "x86_64-linux-gnu-gcc"
+
+[target.'cfg(target_os = "macos")']
+# macOS - Clang toolchain
+linker = "clang"
+
+[target.'cfg(target_os = "android")']
+# Android NDK toolchain
+# Actual linker path set by NDK_HOME env var in build scripts
+
+[target.'cfg(target_os = "ios")']
+# iOS - Xcode toolchain
+# Uses the iOS SDK linker from Xcode
+
+[profile.release]
+lto = true
+opt-level = "z"
+strip = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 1

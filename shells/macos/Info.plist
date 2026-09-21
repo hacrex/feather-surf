@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+
+    <key>CFBundleDisplayName</key>
+    <string>FeatherSurf</string>
+
+    <key>CFBundleExecutable</key>
+    <string>FeatherSurf</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>com.feathersurf.browser</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <key>CFBundleName</key>
+    <string>FeatherSurf</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+
+    <!-- CEF subprocess helper path inside the bundle -->
+    <key>CEFSubprocessPath</key>
+    <string>Frameworks/FeatherSurf Helper.app/Contents/MacOS/FeatherSurf Helper</string>
+
+    <!-- CEF resource directory (locales, etc.) -->
+    <key>CEFResourceDirectoryPath</key>
+    <string>Frameworks/Chromium Embedded Framework.framework/Resources</string>
+
+    <!-- Disable GPU sandbox for CEF compatibility -->
+    <key>NSSupportsSecureCoding</key>
+    <true/>
+
+    <!-- Required for CEF off-screen rendering -->
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>FeatherSurf uses screen capture for browser rendering.</string>
+
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright (c) 2026 FeatherSurf Contributors. All rights reserved.</string>
+</dict>
+</plist>

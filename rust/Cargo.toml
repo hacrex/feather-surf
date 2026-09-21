@@ -9,6 +9,8 @@ members = [
     "cache-manager",
     "download-manager",
     "telemetry",
+    "pal",
+    "ffi",
 ]
 
 [workspace.package]

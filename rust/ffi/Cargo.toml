@@ -1,0 +1,13 @@
+[package]
+name = "feathersurf-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "C FFI bridge for FeatherSurf cross-platform integration"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+tab_manager = { package = "feathersurf-tab-manager", path = "../tab-manager" }
+memory_manager = { package = "feathersurf-memory-manager", path = "../memory-manager" }

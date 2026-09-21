@@ -1,7 +1,8 @@
 // FeatherSurf Browser Window
 //
 // Manages the main browser window, address bar, tab strip, and navigation
-// controls. Connects to CEF for web rendering.
+// controls. Connects to CEF for web rendering and the Rust FFI bridge
+// for tab lifecycle management.
 
 #pragma once
 
@@ -65,6 +66,11 @@ private:
     void AddTab(const std::wstring& title, const std::wstring& url);
     void CloseTab(int index);
     void SelectTab(int index);
+
+    // CEF browser management
+    void CreateCefBrowserForTab(int index, const std::wstring& url);
+    void ShowCefBrowserForTab(int index);
+    void ResizeCefBrowsers();
 
     HWND hwnd_ = nullptr;
     HWND address_bar_ = nullptr;

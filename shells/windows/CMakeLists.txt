@@ -37,6 +37,15 @@ target_compile_definitions(feathersurf PRIVATE
     ${CEF_DEFINITIONS}
 )
 
+# Rust FFI library (built by cargo)
+# Set RUST_LIB_DIR to the cargo build output directory
+if(NOT DEFINED RUST_LIB_DIR)
+    set(RUST_LIB_DIR "${CMAKE_SOURCE_DIR}/../../rust/target/release")
+endif()
+
+target_link_directories(feathersurf PRIVATE ${RUST_LIB_DIR})
+target_link_libraries(feathersurf PRIVATE feathersurf_ffi)
+
 # Windows-specific settings
 target_link_libraries(feathersurf PRIVATE
     comctl32

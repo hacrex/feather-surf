@@ -213,27 +213,27 @@ documented, and tested from a clean installation on every target platform.
 - [ ] `[mac]` Create `NSWindow` with `NSApplication` run loop.
 - [ ] `[android]` Create `Activity` with `SurfaceView` or `WebView`.
 - [ ] `[ios]` Create `UIWindow` with `UIViewController`.
-- [ ] Add application startup and shutdown handling per platform.
+- [x] Add application startup and shutdown handling per platform.
 - [ ] Add structured logging with privacy-safe defaults (`tracing` crate).
 - [ ] Add crash-safe startup recovery (session file validation).
-- [ ] Add a basic settings directory and profile directory per platform conventions:
+- [x] Add a basic settings directory and profile directory per platform conventions:
   - `[win]` `%LOCALAPPDATA%\FeatherSurf\`
   - `[linux]` `~/.config/feathersurf/`
   - `[mac]` `~/Library/Application Support/FeatherSurf/`
   - `[android]` App internal storage via `Context.getFilesDir()`
   - `[ios]` App sandbox `Documents/` or `Library/`
-- [ ] Add a single browser window.
+- [x] Add a single browser window.
 
 **Acceptance criteria:** A clean build opens a native browser window and exits without data corruption on every target platform.
 
 ### 3.2 Implement navigation
 
-- [ ] Add an address bar.
-- [ ] Parse and validate URLs.
-- [ ] Add navigation start, commit, finish, and failure events.
-- [ ] Add back, forward, reload, and stop controls.
-- [ ] Display navigation errors without exposing sensitive data in logs.
-- [ ] Add basic keyboard shortcuts per platform conventions:
+- [x] Add an address bar.
+- [x] Parse and validate URLs.
+- [x] Add navigation start, commit, finish, and failure events.
+- [x] Add back, forward, reload, and stop controls.
+- [x] Display navigation errors without exposing sensitive data in logs.
+- [x] Add basic keyboard shortcuts per platform conventions:
   - `[win][linux]` `Ctrl+T`, `Ctrl+W`, `Ctrl+L`, `Ctrl+R`, `Alt+Left`, `Alt+Right`
   - `[mac]` `Cmd+T`, `Cmd+W`, `Cmd+L`, `Cmd+R`, `Cmd+[`, `Cmd+]`
   - `[android][ios]` Gesture-based or toolbar buttons (no physical keyboard assumed).
@@ -242,12 +242,12 @@ documented, and tested from a clean installation on every target platform.
 
 ### 3.3 Connect the tab manager
 
-- [ ] Create a tab from the browser shell.
-- [ ] Associate renderer instances with tab IDs.
-- [ ] Update snapshots on navigation and relevant page events.
-- [ ] Send focus, media, form, and activity events to the tab manager via FFI.
-- [ ] Close tabs and release renderer resources.
-- [ ] Restore tabs from a saved session.
+- [x] Create a tab from the browser shell.
+- [x] Associate renderer instances with tab IDs.
+- [x] Update snapshots on navigation and relevant page events.
+- [x] Send focus, media, form, and activity events to the tab manager via FFI.
+- [x] Close tabs and release renderer resources.
+- [x] Restore tabs from a saved session.
 - [ ] `[android][ios]` Handle back-button / swipe gestures as tab navigation.
 
 **Acceptance criteria:** The shell can create, select, navigate, close, save, and restore tabs using the tab state-machine API.
@@ -257,10 +257,10 @@ documented, and tested from a clean installation on every target platform.
 - [x] `[win][linux][mac]` Add a tab strip (horizontal).
 - `[android]` Add tab strip or tab overview grid.
 - `[ios]` Add tab overview (Safari-style grid).
-- [ ] Add new-tab and close-tab controls.
+- [x] Add new-tab and close-tab controls.
 - [ ] Add a loading indicator.
 - [ ] Add page-title updates.
-- [ ] Add window-level error reporting.
+- [x] Add window-level error reporting.
 - [ ] Add a minimal preferences screen.
 
 **Acceptance criteria:** The browser is usable for basic multi-tab navigation without requiring developer tools or manual configuration.

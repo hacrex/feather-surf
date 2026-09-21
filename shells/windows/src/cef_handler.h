@@ -9,6 +9,7 @@
 #include <include/cef_browser.h>
 
 #include <string>
+#include <map>
 
 class CefHandler : public CefClient,
                    public CefLifeSpanHandler,
@@ -61,11 +62,14 @@ public:
                         bool user_gesture,
                         bool is_redirect) override;
 
-    // Get the CEF browser for a given tab ID (for FFI bridge)
+    // Tab management via FFI
     CefRefPtr<CefBrowser> GetBrowserForTab(int64_t tab_id) const;
-
-    // Get the tab ID for a given CEF browser
     int64_t GetTabIdForBrowser(CefRefPtr<CefBrowser> browser) const;
+
+    // Freeze/Suspend/Restore commands
+    bool FreezeTab(int64_t tab_id);
+    bool SuspendTab(int64_t tab_id);
+    bool RestoreTab(int64_t tab_id, const std::string& url);
 
 private:
     // Map of browser IDs to tab IDs

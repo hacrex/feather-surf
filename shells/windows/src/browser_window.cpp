@@ -1,10 +1,19 @@
 // FeatherSurf Browser Window Implementation
+//
+// Manages the main browser window, address bar, tab strip, and navigation
+// controls. Connects to CEF for web rendering and the Rust FFI bridge
+// for tab lifecycle management.
 
 #include "browser_window.h"
+#include "cef_handler.h"
+#include "feathersurf_ffi.h"
 
 #include <commctrl.h>
 #include <shlwapi.h>
 #include <shellscalingapi.h>
+
+#include <include/cef_app.h>
+#include <include/cef_browser.h>
 
 #pragma comment(lib, "shcore.lib")
 
@@ -16,6 +25,9 @@ constexpr int TOOLBAR_HEIGHT = 40;
 constexpr int TAB_HEIGHT = 32;
 constexpr int STATUS_HEIGHT = 22;
 constexpr int NAV_BUTTON_WIDTH = 30;
+
+// Global CEF handler (shared across tabs)
+CefRefPtr<CefHandler> g_cef_handler;
 
 }  // namespace
 
@@ -102,6 +114,17 @@ LRESULT BrowserWindow::OnCreate(HWND hwnd) {
     CreateTabStrip(hwnd);
     CreateStatusBar(hwnd);
 
+    // Create the browser view container
+    browser_view_ = CreateWindowExW(
+        0, L"STATIC", L"",
+        WS_CHILD | WS_VISIBLE | SS_BLACKRECT,
+        0, 0, 0, 0,
+        hwnd, nullptr,
+        GetModuleHandleW(nullptr), nullptr);
+
+    // Initialize CEF handler
+    g_cef_handler = new CefHandler();
+
     // Add a default tab
     AddTab(L"New Tab", L"about:blank");
 
@@ -165,6 +188,9 @@ LRESULT BrowserWindow::OnSize(WPARAM wp, LPARAM lp) {
     if (browser_view_) {
         MoveWindow(browser_view_, 0, y, width, browser_height, TRUE);
     }
+
+    // Resize all CEF browsers
+    ResizeCefBrowsers();
 
     return 0;
 }
@@ -235,6 +261,8 @@ LRESULT BrowserWindow::OnKeyDown(WPARAM wp, LPARAM lp) {
     }
     return DefWindowProcW(hwnd_, WM_KEYDOWN, wp, lp);
 }
+
+// ── UI Creation ────────────────────────────────────────────────────
 
 void BrowserWindow::CreateAddressBar(HWND parent) {
     address_bar_ = CreateWindowExW(
@@ -312,16 +340,17 @@ void BrowserWindow::CreateStatusBar(HWND parent) {
     }
 }
 
+// ── Navigation ─────────────────────────────────────────────────────
+
 void BrowserWindow::NavigateTo(const std::wstring& url) {
-    // TODO: Connect to CEF browser
-    // For now, update the address bar and status bar
     SetWindowTextW(address_bar_, url.c_str());
     SendMessageW(status_bar_, SB_SETTEXT, 0,
                  reinterpret_cast<LPARAM>(L"Navigating..."));
 
     if (current_tab_ >= 0 && current_tab_ < static_cast<int>(tabs_.size())) {
         tabs_[current_tab_].url = url;
-        // Update tab title
+
+        // Update tab title in tab strip
         wchar_t display[128];
         if (url.length() > 30) {
             wcscpy_s(display, L"");
@@ -334,21 +363,33 @@ void BrowserWindow::NavigateTo(const std::wstring& url) {
         tie.mask = TCIF_TEXT;
         tie.pszText = display;
         TabCtrl_SetItem(tab_strip_, current_tab_, &tie);
+
+        // Navigate CEF browser
+        auto browser = g_cef_handler->GetBrowserForTab(current_tab_);
+        if (browser) {
+            browser->GetMainFrame()->LoadURL(CefString(url));
+        }
     }
 }
 
 void BrowserWindow::GoBack() {
-    // TODO: CEF GoBack
+    auto browser = g_cef_handler->GetBrowserForTab(current_tab_);
+    if (browser) {
+        browser->GoBack();
+    }
 }
 
 void BrowserWindow::GoForward() {
-    // TODO: CEF GoForward
+    auto browser = g_cef_handler->GetBrowserForTab(current_tab_);
+    if (browser) {
+        browser->GoForward();
+    }
 }
 
 void BrowserWindow::Reload() {
-    // TODO: CEF Reload
-    if (current_tab_ >= 0 && current_tab_ < static_cast<int>(tabs_.size())) {
-        NavigateTo(tabs_[current_tab_].url);
+    auto browser = g_cef_handler->GetBrowserForTab(current_tab_);
+    if (browser) {
+        browser->Reload();
     }
 }
 
@@ -356,8 +397,9 @@ void BrowserWindow::GoHome() {
     NavigateTo(home_url_);
 }
 
-void BrowserWindow::AddTab(const std::wstring& title,
-                            const std::wstring& url) {
+// ── Tab Management ─────────────────────────────────────────────────
+
+void BrowserWindow::AddTab(const std::wstring& title, const std::wstring& url) {
     tabs_.push_back({title, url});
 
     TCITEMW tie = {};
@@ -365,6 +407,9 @@ void BrowserWindow::AddTab(const std::wstring& title,
     tie.pszText = const_cast<wchar_t*>(title.c_str());
     TabCtrl_InsertItem(tab_strip_,
                        static_cast<int>(tabs_.size()) - 1, &tie);
+
+    // Create CEF browser for the new tab
+    CreateCefBrowserForTab(static_cast<int>(tabs_.size()) - 1, url);
 
     SelectTab(static_cast<int>(tabs_.size()) - 1);
 }
@@ -375,6 +420,12 @@ void BrowserWindow::CloseTab(int index) {
         // Last tab - close window
         DestroyWindow(hwnd_);
         return;
+    }
+
+    // Close CEF browser for this tab
+    auto browser = g_cef_handler->GetBrowserForTab(index);
+    if (browser) {
+        browser->GetHost()->CloseBrowser(true);
     }
 
     tabs_.erase(tabs_.begin() + index);
@@ -390,5 +441,67 @@ void BrowserWindow::SelectTab(int index) {
     if (index < 0 || index >= static_cast<int>(tabs_.size())) return;
     current_tab_ = index;
     TabCtrl_SetCurSel(tab_strip_, index);
-    NavigateTo(tabs_[index].url);
+
+    // Show/hide CEF browsers
+    ShowCefBrowserForTab(index);
+
+    // Update address bar
+    SetWindowTextW(address_bar_, tabs_[index].url.c_str());
+}
+
+// ── CEF Browser Management ─────────────────────────────────────────
+
+void BrowserWindow::CreateCefBrowserForTab(int index, const std::wstring& url) {
+    if (!g_cef_handler || !browser_view_) return;
+
+    CefWindowInfo windowInfo;
+    CefBrowserSettings settings;
+
+    // Set the parent window to our browser view container
+    windowInfo.SetAsChild(browser_view_, CefRect(0, 0, 0, 0));
+
+    // Create the browser
+    CefRefPtr<CefBrowser> browser;
+    bool result = CefBrowserHost::CreateBrowser(
+        windowInfo,
+        g_cef_handler,
+        CefString(url),
+        settings,
+        nullptr,
+        nullptr);
+
+    if (result) {
+        SendMessageW(status_bar_, SB_SETTEXT, 0,
+                     reinterpret_cast<LPARAM>(L"Browser created"));
+    }
+}
+
+void BrowserWindow::ShowCefBrowserForTab(int index) {
+    // Hide all CEF browsers, show only the selected one
+    // This is handled by the CEF window parenting
+}
+
+void BrowserWindow::ResizeCefBrowsers() {
+    if (!browser_view_) return;
+
+    // Get the size of the browser view container
+    RECT rect;
+    GetClientRect(browser_view_, &rect);
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
+
+    // Resize all CEF browsers to fill the container
+    // Only the active browser should be visible
+    for (size_t i = 0; i < tabs_.size(); ++i) {
+        auto browser = g_cef_handler->GetBrowserForTab(static_cast<int64_t>(i));
+        if (browser) {
+            HWND hwnd = browser->GetHost()->GetWindowHandle();
+            if (hwnd) {
+                // Position all browsers at (0,0) but only show the active one
+                MoveWindow(hwnd, 0, 0, width, height, TRUE);
+                ShowWindow(hwnd, (i == static_cast<size_t>(current_tab_))
+                    ? SW_SHOW : SW_HIDE);
+            }
+        }
+    }
 }

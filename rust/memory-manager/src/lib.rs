@@ -4,6 +4,7 @@
 //! observations and execute the resulting state changes outside this crate.
 
 pub mod renderer;
+pub mod developer;
 
 use std::collections::HashMap;
 use tab_manager::{Tab, TabProtection, TabState};

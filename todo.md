@@ -381,11 +381,11 @@ documented, and tested from a clean installation on every target platform.
 
 ### 5.5 Build the Developer Center
 
-- [ ] Add browser-wide memory and CPU summaries.
-- [ ] Add per-tab and per-process resource views.
-- [ ] Add state-transition history.
-- [ ] Add current score and policy reason.
-- [ ] Add exportable diagnostics.
+- [x] Add browser-wide memory and CPU summaries.
+- [x] Add per-tab and per-process resource views.
+- [x] Add state-transition history.
+- [x] Add current score and policy reason.
+- [x] Add exportable diagnostics.
 - [ ] Redact URLs and content where privacy settings require it.
 - [ ] `[win][linux][mac]` Show Developer Center in a dedicated tab or window.
 - `[android][ios]` Show Developer Center in settings or as a debug overlay.

@@ -3,5 +3,8 @@ name = "feathersurf-tab-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Policy-aware tab lifecycle state machine for FeatherSurf"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+bincode = "1"

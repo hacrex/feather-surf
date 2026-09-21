@@ -6,8 +6,11 @@
 
 use std::fmt;
 
+/// Current snapshot schema version. Bump when `TabSnapshot` fields change.
+pub const SNAPSHOT_SCHEMA_VERSION: u32 = 1;
+
 /// Lifecycle states, ordered from most active to most reclaimable.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum TabState {
     Active,
     RecentlyActive,
@@ -26,7 +29,7 @@ impl TabState {
 }
 
 /// Signals that protect a tab from destructive lifecycle transitions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub struct TabProtection {
     /// User explicitly pinned the tab.
     pub pinned: bool,
@@ -44,7 +47,7 @@ impl TabProtection {
 
 /// State that must survive suspension or discard so a browser adapter can
 /// restore the tab without losing the user's place.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct TabSnapshot {
     pub url: String,
     pub title: String,
@@ -61,10 +64,68 @@ impl TabSnapshot {
             form_state: None,
         }
     }
+
+    /// Serialize the snapshot with a schema version envelope (bincode).
+    pub fn serialize_versioned(&self) -> Result<Vec<u8>, SnapshotError> {
+        let envelope = VersionedSnapshot {
+            schema_version: SNAPSHOT_SCHEMA_VERSION,
+            snapshot: self.clone(),
+        };
+        bincode::serialize(&envelope).map_err(|e| SnapshotError::Encode(e.to_string()))
+    }
+
+    /// Deserialize a snapshot from a versioned bincode envelope.
+    ///
+    /// Returns `SnapshotError::IncompatibleVersion` if the stored version
+    /// is newer than `SNAPSHOT_SCHEMA_VERSION`.
+    pub fn deserialize_versioned(data: &[u8]) -> Result<Self, SnapshotError> {
+        let envelope: VersionedSnapshot =
+            bincode::deserialize(data).map_err(|e| SnapshotError::Decode(e.to_string()))?;
+        if envelope.schema_version > SNAPSHOT_SCHEMA_VERSION {
+            return Err(SnapshotError::IncompatibleVersion {
+                stored: envelope.schema_version,
+                current: SNAPSHOT_SCHEMA_VERSION,
+            });
+        }
+        Ok(envelope.snapshot)
+    }
 }
 
-/// A browser-independent tab record managed by the lifecycle state machine.
+/// Wrapper that pairs a snapshot with its schema version for forward-compatible
+/// deserialization.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+struct VersionedSnapshot {
+    schema_version: u32,
+    snapshot: TabSnapshot,
+}
+
+/// Errors that can occur during snapshot serialization or deserialization.
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SnapshotError {
+    Encode(String),
+    Decode(String),
+    IncompatibleVersion { stored: u32, current: u32 },
+}
+
+impl fmt::Display for SnapshotError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Encode(msg) => write!(f, "snapshot encoding failed: {msg}"),
+            Self::Decode(msg) => write!(f, "snapshot decoding failed: {msg}"),
+            Self::IncompatibleVersion { stored, current } => {
+                write!(
+                    f,
+                    "snapshot version {stored} is incompatible with current version {current}"
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for SnapshotError {}
+
+/// A browser-independent tab record managed by the lifecycle state machine.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Tab {
     pub id: u64,
     state: TabState,
@@ -82,6 +143,10 @@ impl Tab {
             snapshot: TabSnapshot::new(url),
             revision: 0,
         }
+    }
+
+    pub const fn id(&self) -> u64 {
+        self.id
     }
 
     pub const fn state(&self) -> TabState {
@@ -316,6 +381,106 @@ mod tests {
         assert_eq!(tab.revision(), 0);
         tab.transition_to(TabState::RecentlyActive).unwrap();
         assert_eq!(tab.revision(), 1);
+    }
+}
+
+#[cfg(test)]
+mod snapshot_serialization_tests {
+    use super::*;
+
+    #[test]
+    fn snapshot_roundtrip_preserves_all_fields() {
+        let original = TabSnapshot {
+            url: "https://example.test/page?q=1".into(),
+            title: "Test Page".into(),
+            scroll_position: (42, 1080),
+            form_state: Some("hello world".into()),
+        };
+
+        let bytes = original.serialize_versioned().unwrap();
+        let restored = TabSnapshot::deserialize_versioned(&bytes).unwrap();
+
+        assert_eq!(original, restored);
+    }
+
+    #[test]
+    fn empty_snapshot_roundtrips() {
+        let original = TabSnapshot::new("about:blank");
+        let bytes = original.serialize_versioned().unwrap();
+        let restored = TabSnapshot::deserialize_versioned(&bytes).unwrap();
+        assert_eq!(original, restored);
+    }
+
+    #[test]
+    fn snapshot_with_none_form_state_roundtrips() {
+        let original = TabSnapshot {
+            url: "https://example.test".into(),
+            title: String::new(),
+            scroll_position: (0, 0),
+            form_state: None,
+        };
+        let bytes = original.serialize_versioned().unwrap();
+        let restored = TabSnapshot::deserialize_versioned(&bytes).unwrap();
+        assert_eq!(original, restored);
+    }
+
+    #[test]
+    fn versioned_envelope_contains_correct_schema_version() {
+        let snapshot = TabSnapshot::new("https://test.com");
+        let bytes = snapshot.serialize_versioned().unwrap();
+        let envelope: VersionedSnapshot = bincode::deserialize(&bytes).unwrap();
+        assert_eq!(envelope.schema_version, SNAPSHOT_SCHEMA_VERSION);
+    }
+
+    #[test]
+    fn deserialize_rejects_future_version() {
+        let envelope = VersionedSnapshot {
+            schema_version: SNAPSHOT_SCHEMA_VERSION + 1,
+            snapshot: TabSnapshot::new("https://test.com"),
+        };
+        let bytes = bincode::serialize(&envelope).unwrap();
+        let result = TabSnapshot::deserialize_versioned(&bytes);
+        assert!(matches!(
+            result,
+            Err(SnapshotError::IncompatibleVersion { .. })
+        ));
+    }
+
+    #[test]
+    fn tab_serializes_and_deserializes() {
+        let mut tab = Tab::new(42, "https://example.test");
+        tab.set_protection(TabProtection {
+            pinned: true,
+            media_playing: false,
+            dirty_form: true,
+        });
+        tab.snapshot_mut().title = "Pinned Tab".into();
+        tab.snapshot_mut().scroll_position = (100, 500);
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+
+        let bytes = bincode::serialize(&tab).unwrap();
+        let restored: Tab = bincode::deserialize(&bytes).unwrap();
+
+        assert_eq!(tab, restored);
+        assert_eq!(restored.id(), 42);
+        assert_eq!(restored.state(), TabState::Background);
+        assert_eq!(restored.protection().pinned, true);
+        assert_eq!(restored.protection().dirty_form, true);
+        assert_eq!(restored.snapshot().title, "Pinned Tab");
+        assert_eq!(restored.revision(), 2);
+    }
+
+    #[test]
+    fn corrupt_data_returns_decode_error() {
+        let result = TabSnapshot::deserialize_versioned(&[0xFF, 0xFE, 0xFD]);
+        assert!(matches!(result, Err(SnapshotError::Decode(_))));
+    }
+
+    #[test]
+    fn empty_data_returns_decode_error() {
+        let result = TabSnapshot::deserialize_versioned(&[]);
+        assert!(matches!(result, Err(SnapshotError::Decode(_))));
     }
 }
 

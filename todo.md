@@ -108,18 +108,18 @@ documented, and tested from a clean installation on every target platform.
 
 ### 1.2 Define system interfaces
 
-- [ ] Define the browser-shell interface to the tab manager.
-- [ ] Define the process-monitor interface.
-- [ ] Define the renderer adapter interface for freeze, suspend, discard, and restore.
-- [ ] Define the session snapshot format and versioning rules.
-- [ ] Define the resource telemetry schema.
-- [ ] Define error-handling and cancellation rules for asynchronous operations.
-- [ ] Define which operations must run on the UI thread and which may run in worker tasks.
-- [ ] `[win]` Define COM/WinRT interface boundaries for Windows shell integration.
-- [ ] `[linux]` Define D-Bus or socket interface for Linux desktop integration.
-- [ ] `[mac]` Define Objective-C bridging for macOS shell integration.
-- [ ] `[android]` Define JNI interface for Android Activity ↔ Rust communication.
-- [ ] `[ios]` Define Swift-ObjC-C++ bridging for iOS shell ↔ Rust communication.
+- [x] Define the browser-shell interface to the tab manager.
+- [x] Define the process-monitor interface.
+- [x] Define the renderer adapter interface for freeze, suspend, discard, and restore.
+- [x] Define the session snapshot format and versioning rules.
+- [x] Define the resource telemetry schema.
+- [x] Define error-handling and cancellation rules for asynchronous operations.
+- [x] Define which operations must run on the UI thread and which may run in worker tasks.
+- [x] `[win]` Define COM/WinRT interface boundaries for Windows shell integration.
+- [x] `[linux]` Define D-Bus or socket interface for Linux desktop integration.
+- [x] `[mac]` Define Objective-C bridging for macOS shell integration.
+- [x] `[android]` Define JNI interface for Android Activity ↔ Rust communication.
+- [x] `[ios]` Define Swift-ObjC-C++ bridging for iOS shell ↔ Rust communication.
 
 **Acceptance criteria:** Each planned component has a documented input/output contract and does not depend on undocumented global state. Platform bridges are specified.
 
@@ -193,11 +193,11 @@ documented, and tested from a clean installation on every target platform.
 
 ### 2.4 Add model-level property testing
 
-- [ ] Add property tests for legal transition invariants.
-- [ ] Verify that protected tabs never enter reclaimable states.
-- [ ] Verify that failed transitions never mutate state or revision.
-- [ ] Verify that restoration preserves snapshot data.
-- [ ] Verify that score outputs remain within `[0, 1]` for arbitrary inputs.
+- [x] Add property tests for legal transition invariants.
+- [x] Verify that protected tabs never enter reclaimable states.
+- [x] Verify that failed transitions never mutate state or revision.
+- [x] Verify that restoration preserves snapshot data.
+- [x] Verify that score outputs remain within `[0, 1]` for arbitrary inputs.
 - [ ] Verify that hysteresis cannot produce an immediate reclaim/restore loop.
 
 **Acceptance criteria:** Property tests cover the invariants that ordinary example-based tests cannot exhaustively cover.
@@ -209,7 +209,7 @@ documented, and tested from a clean installation on every target platform.
 ### 3.1 Create the executable shell
 
 - [x] `[win]` Create Win32 window with `CreateWindowExW`, message loop, and DPI awareness.
-- [ ] `[linux]` Create GTK4 or raw Wayland/X11 window with `xdg-shell`.
+- [x] `[linux]` Create GTK4 or raw Wayland/X11 window with `xdg-shell`.
 - [ ] `[mac]` Create `NSWindow` with `NSApplication` run loop.
 - [ ] `[android]` Create `Activity` with `SurfaceView` or `WebView`.
 - [ ] `[ios]` Create `UIWindow` with `UIViewController`.

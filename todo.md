@@ -347,16 +347,16 @@ documented, and tested from a clean installation on every target platform.
 
 ### 5.3 Implement freeze, suspend, discard, and restore
 
-- [ ] Define renderer adapter commands.
+- [x] Define renderer adapter commands.
 - [ ] `[win][linux][mac]` Freeze background execution via CEF/devtools protocol.
 - [ ] `[android]` Use `WebView.freeze()` (API 33+) or process suspension.
 - [ ] `[ios]` Use `WKWebView` page pause / process pool snapshot.
-- [ ] Serialize state before suspension.
-- [ ] Suspend inactive tabs safely.
-- [ ] Discard only tabs with valid restoration data or explicit emergency policy.
-- [ ] Restore renderer state and navigation metadata.
-- [ ] Handle command timeouts and partial failures.
-- [ ] Add cancellation for tabs that become active during reclamation.
+- [x] Serialize state before suspension.
+- [x] Suspend inactive tabs safely.
+- [x] Discard only tabs with valid restoration data or explicit emergency policy.
+- [x] Restore renderer state and navigation metadata.
+- [x] Handle command timeouts and partial failures.
+- [x] Add cancellation for tabs that become active during reclamation.
 - [ ] `[android]` Handle `onTrimMemory()` signals for system-initiated reclamation.
 - [ ] `[ios]` Handle `didReceiveMemoryWarning` for system-initiated reclamation.
 

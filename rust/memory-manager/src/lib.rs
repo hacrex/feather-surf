@@ -3,6 +3,8 @@
 //! This crate owns policy decisions. Renderer/process adapters should provide
 //! observations and execute the resulting state changes outside this crate.
 
+pub mod renderer;
+
 use std::collections::HashMap;
 use tab_manager::{Tab, TabProtection, TabState};
 

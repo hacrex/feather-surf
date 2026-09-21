@@ -37,11 +37,13 @@ pub struct TabProtection {
     pub media_playing: bool,
     /// The page contains unsaved user input.
     pub dirty_form: bool,
+    /// User explicitly requested this tab stay alive (overrides automatic eviction).
+    pub keep_awake: bool,
 }
 
 impl TabProtection {
     pub const fn blocks_reclaim(self) -> bool {
-        self.pinned || self.media_playing || self.dirty_form
+        self.pinned || self.media_playing || self.dirty_form || self.keep_awake
     }
 }
 
@@ -197,6 +199,64 @@ impl Tab {
         self.state = target;
         self.revision = self.revision.saturating_add(1);
         Ok(())
+    }
+
+    /// Force-suspend a tab, bypassing protection checks.
+    ///
+    /// This is the user-initiated "suspend now" action. It clears all
+    /// protection flags and transitions directly to Suspended (or Frozen
+    /// if the tab is not yet in a reclaimable state).
+    ///
+    /// Returns the previous state on success.
+    pub fn force_suspend(&mut self) -> Result<TabState, TransitionError> {
+        let prev = self.state;
+
+        // If already suspended, nothing to do
+        if prev == TabState::Suspended {
+            return Err(TransitionError::AlreadyInState(TabState::Suspended));
+        }
+
+        // Clear all protections so the transition can proceed
+        self.protection = TabProtection::default();
+
+        // If in an active state, walk through the required intermediate states
+        match prev {
+            TabState::Active => {
+                self.state = TabState::RecentlyActive;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Background;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Frozen;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Suspended;
+                self.revision = self.revision.saturating_add(1);
+            }
+            TabState::RecentlyActive => {
+                self.state = TabState::Background;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Frozen;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Suspended;
+                self.revision = self.revision.saturating_add(1);
+            }
+            TabState::Background => {
+                self.state = TabState::Frozen;
+                self.revision = self.revision.saturating_add(1);
+                self.state = TabState::Suspended;
+                self.revision = self.revision.saturating_add(1);
+            }
+            TabState::Frozen => {
+                self.state = TabState::Suspended;
+                self.revision = self.revision.saturating_add(1);
+            }
+            TabState::Discardable => {
+                self.state = TabState::Suspended;
+                self.revision = self.revision.saturating_add(1);
+            }
+            TabState::Suspended => unreachable!(),
+        }
+
+        Ok(prev)
     }
 }
 
@@ -481,6 +541,133 @@ mod snapshot_serialization_tests {
     fn empty_data_returns_decode_error() {
         let result = TabSnapshot::deserialize_versioned(&[]);
         assert!(matches!(result, Err(SnapshotError::Decode(_))));
+    }
+}
+
+#[cfg(test)]
+mod user_override_tests {
+    use super::*;
+
+    #[test]
+    fn keep_awake_blocks_eviction() {
+        let mut tab = Tab::new(1, "https://important.com");
+        tab.set_protection(TabProtection {
+            keep_awake: true,
+            ..TabProtection::default()
+        });
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        // Cannot freeze a keep-awake tab
+        assert!(tab.transition_to(TabState::Frozen).is_err());
+        assert_eq!(tab.state(), TabState::Background);
+    }
+
+    #[test]
+    fn force_suspend_clears_all_protections() {
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.set_protection(TabProtection {
+            pinned: true,
+            media_playing: true,
+            dirty_form: true,
+            keep_awake: true,
+        });
+        let prev = tab.force_suspend().unwrap();
+        assert_eq!(prev, TabState::Active);
+        assert_eq!(tab.state(), TabState::Suspended);
+        assert!(!tab.protection().pinned);
+        assert!(!tab.protection().media_playing);
+        assert!(!tab.protection().dirty_form);
+        assert!(!tab.protection().keep_awake);
+    }
+
+    #[test]
+    fn force_suspend_from_background() {
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.set_protection(TabProtection {
+            pinned: true,
+            ..TabProtection::default()
+        });
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        let prev = tab.force_suspend().unwrap();
+        assert_eq!(prev, TabState::Background);
+        assert_eq!(tab.state(), TabState::Suspended);
+    }
+
+    #[test]
+    fn force_suspend_from_frozen() {
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        tab.transition_to(TabState::Frozen).unwrap();
+        let prev = tab.force_suspend().unwrap();
+        assert_eq!(prev, TabState::Frozen);
+        assert_eq!(tab.state(), TabState::Suspended);
+    }
+
+    #[test]
+    fn force_suspend_already_suspended_fails() {
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        tab.transition_to(TabState::Frozen).unwrap();
+        tab.transition_to(TabState::Suspended).unwrap();
+        assert!(matches!(
+            tab.force_suspend(),
+            Err(TransitionError::AlreadyInState(TabState::Suspended))
+        ));
+    }
+
+    #[test]
+    fn force_suspend_increments_revision() {
+        let mut tab = Tab::new(1, "https://example.com");
+        let before = tab.revision();
+        tab.force_suspend().unwrap();
+        assert!(tab.revision() > before);
+    }
+
+    #[test]
+    fn hysteresis_prevents_immediate_loop() {
+        // Simulate: tab is suspended, restored to active, then immediately
+        // goes back to background. The eviction manager should not re-suspend
+        // immediately due to cooldown.
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        tab.transition_to(TabState::Frozen).unwrap();
+        tab.transition_to(TabState::Suspended).unwrap();
+
+        // Restore to active
+        tab.transition_to(TabState::Active).unwrap();
+        assert_eq!(tab.state(), TabState::Active);
+
+        // Try to immediately re-suspend (should fail - needs intermediate states)
+        assert!(tab.transition_to(TabState::Suspended).is_err());
+        assert!(tab.transition_to(TabState::Frozen).is_err());
+
+        // Must go through the proper lifecycle
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        assert_eq!(tab.state(), TabState::Background);
+    }
+
+    #[test]
+    fn keep_awake_can_be_cleared() {
+        let mut tab = Tab::new(1, "https://example.com");
+        tab.set_protection(TabProtection {
+            keep_awake: true,
+            ..TabProtection::default()
+        });
+        assert!(tab.protection().blocks_reclaim());
+
+        // Clear keep_awake
+        tab.set_protection(TabProtection::default());
+        assert!(!tab.protection().blocks_reclaim());
+
+        // Now eviction can proceed
+        tab.transition_to(TabState::RecentlyActive).unwrap();
+        tab.transition_to(TabState::Background).unwrap();
+        assert!(tab.transition_to(TabState::Frozen).is_ok());
     }
 }
 

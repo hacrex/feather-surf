@@ -105,6 +105,7 @@ pub unsafe extern "C" fn feathersurf_tab_set_protection(
     pinned: bool,
     media_playing: bool,
     dirty_form: bool,
+    keep_awake: bool,
 ) {
     if tab.is_null() {
         return;
@@ -114,7 +115,22 @@ pub unsafe extern "C" fn feathersurf_tab_set_protection(
         pinned,
         media_playing,
         dirty_form,
+        keep_awake,
     });
+}
+
+/// Force-suspend a tab, bypassing all protection flags.
+/// Returns 0 on success.
+#[no_mangle]
+pub unsafe extern "C" fn feathersurf_tab_force_suspend(tab: *mut FfiTab) -> u32 {
+    if tab.is_null() {
+        return 1;
+    }
+    let tab = unsafe { &mut *tab };
+    match tab.inner.force_suspend() {
+        Ok(_) => 0,
+        Err(_) => 2,
+    }
 }
 
 /// Get the tab's current URL. Returns a pointer to a static string.

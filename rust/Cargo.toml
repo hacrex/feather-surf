@@ -4,6 +4,7 @@ members = [
     "memory-manager",
     "tab-manager",
     "session-manager",
+    "storage",
     "process-manager",
     "resource-monitor",
     "privacy-engine",

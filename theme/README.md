@@ -4,7 +4,7 @@ FeatherSurf uses a **lightweight feather** visual language: open space, soft sky
 
 ## Design principles
 
-The interface should feel calm, quick, and legible. Use blue for navigation and trusted interaction, mint for healthy or efficient states, amber for attention, and muted red only for destructive or blocked states. Keep surfaces bright and low-contrast in light mode. Dark mode uses deep navy rather than pure black so the feather mark remains airy.
+The interface should feel calm, quick, and legible. Use blue for navigation and trusted interaction, mint for healthy or efficient states, amber for attention, and muted red only for destructive or blocked states. Keep surfaces bright and low-contrast in light mode. The **Feather Night** mode uses near-black navy, cyan navigation, mint health signals, and soft horizontal light streaks inspired by the selected FeatherSurf mark.
 
 Use `theme/feathersurf.css` as the shared source of truth for colors, typography, radii, shadows, focus rings, and motion timing.
 
@@ -19,6 +19,18 @@ The default theme is light. Add `data-theme="dark"` to the root element for dark
 ```
 
 The design tokens are CSS custom properties, so a native browser shell or a web-based prototype can consume the same values. The UI should respect the user's system preference when no explicit theme is selected.
+
+## Feather Night browser UI
+
+The CSS also provides reusable browser chrome primitives: `.fs-browser-shell`,
+`.fs-topbar`, `.fs-tab-strip`, `.fs-tab`, `.fs-toolbar`, `.fs-address-bar`,
+`.fs-icon-button`, `.fs-hero-card`, `.fs-status-pill`, `.fs-memory-meter`, and
+`.fs-button`. Set `data-theme="night"` or `data-theme="dark"` on the root
+element to activate the selected image's dark palette.
+
+Open [`preview.html`](preview.html) locally to view the complete static browser
+shell reference with tabs, address bar, RAM budget meter, and FeatherSurf hero
+surface.
 
 ## Logo assets
 

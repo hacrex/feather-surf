@@ -3,5 +3,11 @@ name = "feathersurf-download-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Download management for FeatherSurf"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"

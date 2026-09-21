@@ -466,19 +466,19 @@ documented, and tested from a clean installation on every target platform.
 
 ### 7.2 Implement downloads
 
-- [ ] Add download job state and persistence.
-- [ ] Add destination selection.
-- [ ] `[win]` Use Windows Shell `SHGetKnownFolderPath` for Downloads directory.
+- [x] Add download job state and persistence.
+- [x] Add destination selection.
+- [x] `[win]` Use Windows Shell `SHGetKnownFolderPath` for Downloads directory.
 - `[linux]` Use XDG `xdg-user-dir DOWNLOADS`.
 - `[mac]` Use `NSSavePanel` or `~/Downloads`.
 - `[android]` Use `Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS)` or MediaStore.
 - `[ios]` Use `UIDocumentPickerViewController` for save location.
-- [ ] Add pause, resume, cancel, and retry.
-- [ ] Validate filenames and prevent path traversal.
+- [x] Add pause, resume, cancel, and retry.
+- [x] Validate filenames and prevent path traversal.
 - [ ] Add quarantine or malware-scanning integration where available.
 - [ ] `[win]` Integrate with Windows Defender SmartScreen.
 - `[mac]` Integrate with Gatekeeper / XProtect.
-- [ ] Add download history and cleanup controls.
+- [x] Add download history and cleanup controls.
 - [ ] Add progress and error UI.
 
 **Acceptance criteria:** Downloads are resumable, safely stored, visible to the user, and cannot escape the configured destination through malicious filenames.

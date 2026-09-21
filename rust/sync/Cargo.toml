@@ -1,0 +1,13 @@
+[package]
+name = "feathersurf-sync"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "End-to-end encrypted synchronization for FeatherSurf"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"

@@ -13,6 +13,10 @@ members = [
     "telemetry",
     "pal",
     "ffi",
+    "devtools",
+    "sync",
+    "ai",
+    "benchmarks",
 ]
 
 [workspace.package]

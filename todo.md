@@ -489,32 +489,32 @@ documented, and tested from a clean installation on every target platform.
 
 ### 8.1 Resource inspector
 
-- [ ] Add process tree visualization.
-- [ ] Add tab-to-process mapping.
-- [ ] Add live memory and CPU charts.
-- [ ] Add state-transition inspection.
-- [ ] Add snapshot and diagnostic export.
+- [x] Add process tree visualization.
+- [x] Add tab-to-process mapping.
+- [x] Add live memory and CPU charts.
+- [x] Add state-transition inspection.
+- [x] Add snapshot and diagnostic export.
 - [ ] Add sampling controls for development builds.
 
 ### 8.2 Network and page diagnostics
 
-- [ ] Expose request-blocking decisions.
-- [ ] Add navigation timing data.
-- [ ] Add cache status.
-- [ ] Add permission and storage inspection.
-- [ ] Add safe redaction for exported diagnostics.
+- [x] Expose request-blocking decisions.
+- [x] Add navigation timing data.
+- [x] Add cache status.
+- [x] Add permission and storage inspection.
+- [x] Add safe redaction for exported diagnostics.
 
 ### 8.3 Crash and support diagnostics
 
-- [ ] Add opt-in crash reporting.
+- [x] Add opt-in crash reporting.
 - [ ] `[win]` Collect Windows Error Reporting (WER) minidumps.
 - `[linux]` Collect core dumps with `coredumpctl` or `apport`.
 - `[mac]` Collect macOS crash reports from `~/Library/Logs/DiagnosticReports`.
 - `[android]` Use `android.util.Log` and `Application.getProcessName()` for logcat.
 - `[ios]` Use `PLCrashReporter` or equivalent.
-- [ ] Add local crash dump collection.
-- [ ] Add privacy review for all diagnostic fields.
-- [ ] Add a user-facing diagnostic bundle generator.
+- [x] Add local crash dump collection.
+- [x] Add privacy review for all diagnostic fields.
+- [x] Add a user-facing diagnostic bundle generator.
 - [ ] Add a support workflow for reproducible reports.
 
 **Acceptance criteria:** Diagnostic tools help developers reproduce resource, privacy, and navigation issues without collecting unnecessary browsing data.
@@ -525,25 +525,25 @@ documented, and tested from a clean installation on every target platform.
 
 ### 9.1 Define the synchronization model
 
-- [ ] Decide which data types can sync (bookmarks, history, settings, passwords, tabs).
-- [ ] Define conflict-resolution rules.
-- [ ] Define device registration and revocation.
-- [ ] Define offline behavior.
-- [ ] Define server-side metadata minimization.
-- [ ] Record the sync architecture decision.
+- [x] Decide which data types can sync (bookmarks, history, settings, passwords, tabs).
+- [x] Define conflict-resolution rules.
+- [x] Define device registration and revocation.
+- [x] Define offline behavior.
+- [x] Define server-side metadata minimization.
+- [x] Record the sync architecture decision.
 - [ ] `[android][ios]` Define sync behavior under background execution limits.
 
 ### 9.2 Implement end-to-end encrypted sync
 
-- [ ] Choose audited cryptographic primitives and libraries (`ring`, `rustls`, `age`).
-- [ ] Define key generation, storage, recovery, and rotation.
+- [x] Choose audited cryptographic primitives and libraries (`ring`, `rustls`, `age`).
+- [x] Define key generation, storage, recovery, and rotation.
 - [ ] `[win]` Use Windows Credential Manager or DPAPI for key storage.
 - `[linux]` Use `libsecret` / `gnome-keyring` or `kwallet`.
 - `[mac]` Use Keychain Services.
 - `[android]` Use Android Keystore (`android.security.keystore`).
 - `[ios]` Use iOS Keychain (`kSecClassGenericPassword`).
-- [ ] Encrypt data before it leaves the device.
-- [ ] Authenticate devices and sync records.
+- [x] Encrypt data before it leaves the device.
+- [x] Authenticate devices and sync records.
 - [ ] Protect against replay and rollback.
 - [ ] Add recovery and device-revocation flows.
 - [ ] Add interoperability and migration tests.
@@ -571,22 +571,22 @@ documented, and tested from a clean installation on every target platform.
 
 ### 10.1 Define AI privacy and product boundaries
 
-- [ ] Keep AI disabled and non-resident by default.
-- [ ] Define exactly what page data may leave the device.
+- [x] Keep AI disabled and non-resident by default.
+- [x] Define exactly what page data may leave the device.
 - [ ] Add provider-specific data-use disclosures.
-- [ ] Add per-site and per-action consent controls.
-- [ ] Define local-model resource limits.
+- [x] Add per-site and per-action consent controls.
+- [x] Define local-model resource limits.
 - [ ] Add prompt-injection and untrusted-page-content warnings.
 
 ### 10.2 Implement the AI gateway
 
-- [ ] Define a provider-neutral request interface (Rust trait).
-- [ ] Implement cloud-provider adapters (OpenAI, Anthropic, local).
+- [x] Define a provider-neutral request interface (Rust trait).
+- [x] Implement cloud-provider adapters (OpenAI, Anthropic, local).
 - [ ] `[win][linux][mac]` Implement local-provider adapters for Ollama / llama.cpp.
 - [ ] `[android]` Implement local-provider via llama.cpp Android bindings or JNI.
 - [ ] `[ios]` Implement local-provider via llama.cpp Metal acceleration (if feasible).
 - [ ] Add timeout, cancellation, retry, and rate-limit behavior.
-- [ ] Add model availability and capability reporting.
+- [x] Add model availability and capability reporting.
 - [ ] Add resource accounting for local models.
 - [ ] Add audit-safe request logging with content disabled by default.
 
@@ -606,38 +606,38 @@ documented, and tested from a clean installation on every target platform.
 
 ### 11.1 Make benchmarks reproducible
 
-- [ ] Define exact hardware tiers (4 GB, 8 GB, 16 GB RAM).
-- [ ] Define supported operating systems and versions per platform.
+- [x] Define exact hardware tiers (4 GB, 8 GB, 16 GB RAM).
+- [x] Define supported operating systems and versions per platform.
 - [ ] Define browser versions and launch flags.
 - [ ] Define test pages and scripted workloads.
 - [ ] Define cold-cache and warm-cache procedures.
-- [ ] Define RSS, PSS, private memory, CPU, startup, restore, and battery metrics.
+- [x] Define RSS, PSS, private memory, CPU, startup, restore, and battery metrics.
 - [ ] Define warm-up, repetition, and statistical reporting rules.
-- [ ] Store machine-readable benchmark results (JSON + Markdown).
+- [x] Store machine-readable benchmark results (JSON + Markdown).
 - [ ] `[android]` Define benchmark procedures for ARM64 devices (Pixel, Samsung, etc.).
 - [ ] `[ios]` Define benchmark procedures for A-series / M-series devices.
 
 ### 11.2 Build the benchmark harness
 
-- [ ] `[win][linux][mac]` Automate browser launch and shutdown via CLI.
+- [x] `[win][linux][mac]` Automate browser launch and shutdown via CLI.
 - [ ] `[android]` Automate via `adb shell am start` + `adb shell dumpsys meminfo`.
 - [ ] `[ios]` Automate via `xcodebuild test` + Instruments.
-- [ ] Automate tab creation and workload execution.
-- [ ] Automate state transitions.
-- [ ] Collect process and browser metrics.
-- [ ] Collect startup and restore timings.
-- [ ] Generate Markdown and machine-readable reports.
-- [ ] Detect regressions against a baseline.
+- [x] Automate tab creation and workload execution.
+- [x] Automate state transitions.
+- [x] Collect process and browser metrics.
+- [x] Collect startup and restore timings.
+- [x] Generate Markdown and machine-readable reports.
+- [x] Detect regressions against a baseline.
 
 ### 11.3 Establish performance budgets
 
-- [ ] Set startup-time targets per platform.
-- [ ] Set idle-memory targets per platform.
-- [ ] Set per-tab memory targets by workload.
-- [ ] Set restore-time targets.
-- [ ] Set background CPU targets.
-- [ ] Set privacy-filter latency targets.
-- [ ] Set acceptable overhead for diagnostics and AI-disabled mode.
+- [x] Set startup-time targets per platform.
+- [x] Set idle-memory targets per platform.
+- [x] Set per-tab memory targets by workload.
+- [x] Set restore-time targets.
+- [x] Set background CPU targets.
+- [x] Set privacy-filter latency targets.
+- [x] Set acceptable overhead for diagnostics and AI-disabled mode.
 
 **Acceptance criteria:** Every performance claim in the README links to reproducible results and no release exceeds the declared budgets without an explicit decision record.
 

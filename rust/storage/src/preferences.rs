@@ -147,10 +147,10 @@ impl Default for PerformancePrefs {
             memory_mode: "Balanced".to_string(),
             hardware_acceleration: true,
             max_background_tabs: 20,
-            freeze_after_secs: 300,       // 5 minutes
-            suspend_after_secs: 1800,     // 30 minutes
-            discard_after_secs: 3600,     // 1 hour
-            memory_budget_mb: 0,          // unlimited
+            freeze_after_secs: 300,   // 5 minutes
+            suspend_after_secs: 1800, // 30 minutes
+            discard_after_secs: 3600, // 1 hour
+            memory_budget_mb: 0,      // unlimited
             preload_tabs: true,
         }
     }
@@ -248,9 +248,7 @@ impl Preferences {
         }
 
         // Validate tab position
-        if !["top", "bottom", "left", "right"]
-            .contains(&self.appearance.tab_position.as_str())
-        {
+        if !["top", "bottom", "left", "right"].contains(&self.appearance.tab_position.as_str()) {
             self.appearance.tab_position = "top".to_string();
         }
 
@@ -359,7 +357,10 @@ mod tests {
         let json = prefs.to_json().unwrap();
         let restored = Preferences::from_json(&json).unwrap();
         assert_eq!(restored.general.homepage, prefs.general.homepage);
-        assert_eq!(restored.privacy.block_trackers, prefs.privacy.block_trackers);
+        assert_eq!(
+            restored.privacy.block_trackers,
+            prefs.privacy.block_trackers
+        );
     }
 
     #[test]

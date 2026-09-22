@@ -3,7 +3,7 @@
 // Resource inspector, network diagnostics, and crash reporting.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Resource Inspector ─────────────────────────────────────────────
 
@@ -463,18 +463,16 @@ mod tests {
     #[test]
     fn resource_inspector() {
         let mut inspector = ResourceInspector::new();
-        
-        inspector.update_processes(vec![
-            ProcessInfo {
-                pid: 1,
-                tab_id: Some(1),
-                process_type: ProcessType::Renderer,
-                memory_bytes: 100 * 1024 * 1024,
-                cpu_percent: 5.0,
-                state: "running".to_string(),
-                uptime_secs: 3600,
-            },
-        ]);
+
+        inspector.update_processes(vec![ProcessInfo {
+            pid: 1,
+            tab_id: Some(1),
+            process_type: ProcessType::Renderer,
+            memory_bytes: 100 * 1024 * 1024,
+            cpu_percent: 5.0,
+            state: "running".to_string(),
+            uptime_secs: 3600,
+        }]);
 
         assert_eq!(inspector.process_count(), 1);
         assert_eq!(inspector.total_memory(), 100 * 1024 * 1024);
@@ -483,7 +481,7 @@ mod tests {
     #[test]
     fn network_diagnostics() {
         let mut net = NetworkDiagnostics::new();
-        
+
         net.record_decision(RequestDecision {
             url: "https://ads.example.com".to_string(),
             source_url: "https://example.com".to_string(),
@@ -500,7 +498,7 @@ mod tests {
     #[test]
     fn crash_diagnostics() {
         let mut crash = CrashDiagnostics::new();
-        
+
         crash.record_crash(CrashReport {
             id: "crash-001".to_string(),
             timestamp: now_secs(),
@@ -514,7 +512,7 @@ mod tests {
         });
 
         assert_eq!(crash.reports().len(), 1);
-        
+
         let bundle = crash.generate_bundle();
         assert_eq!(bundle.crashes.len(), 1);
     }

@@ -513,6 +513,7 @@ mod snapshot_serialization_tests {
             pinned: true,
             media_playing: false,
             dirty_form: true,
+            keep_awake: false,
         });
         tab.snapshot_mut().title = "Pinned Tab".into();
         tab.snapshot_mut().scroll_position = (100, 500);
@@ -693,9 +694,8 @@ mod property_tests {
 
         #[test]
         fn failed_transition_never_mutates_state(
-            target in prop::enum::select(vec![
+            target in prop::sample::select(vec![
                 TabState::Active,
-                TabState::RecentlyActive,
                 TabState::Background,
                 TabState::Frozen,
                 TabState::Suspended,
@@ -703,6 +703,8 @@ mod property_tests {
             ])
         ) {
             let mut tab = Tab::new(1, "about:blank");
+            // Tab starts in Active; only RecentlyActive is legal from Active.
+            // Our target list excludes RecentlyActive, so all transitions must fail.
             let original_state = tab.state();
             let original_revision = tab.revision();
             let _ = tab.transition_to(target);
@@ -716,7 +718,7 @@ mod property_tests {
             pinned in prop::bool::ANY,
             media in prop::bool::ANY,
             dirty in prop::bool::ANY,
-            target in prop::select(vec![
+            target in prop::sample::select(vec![
                 TabState::Frozen,
                 TabState::Suspended,
                 TabState::Discardable,
@@ -726,6 +728,7 @@ mod property_tests {
                 pinned,
                 media_playing: media,
                 dirty_form: dirty,
+                keep_awake: false,
             };
             if !protection.blocks_reclaim() {
                 return Ok(());
@@ -770,16 +773,16 @@ mod property_tests {
             tab.transition_to(TabState::Active).unwrap();
 
             // Snapshot must be preserved
-            prop_assert_eq!(tab.snapshot().url, url);
-            prop_assert_eq!(tab.snapshot().title, title);
+            prop_assert_eq!(tab.snapshot().url.clone(), url);
+            prop_assert_eq!(tab.snapshot().title.clone(), title);
             prop_assert_eq!(tab.snapshot().scroll_position, (scroll_x, scroll_y));
-            prop_assert_eq!(tab.snapshot().form_state, form_state);
+            prop_assert_eq!(tab.snapshot().form_state.clone(), form_state);
         }
 
         #[test]
         fn revision_only_increases_on_successful_transition(
             transitions in prop::collection::vec(
-                prop::enum::select(vec![
+                prop::sample::select(vec![
                     TabState::Active,
                     TabState::RecentlyActive,
                     TabState::Background,

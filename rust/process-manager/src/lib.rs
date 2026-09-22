@@ -4,7 +4,7 @@
 // Tracks per-process memory usage, CPU, and lifecycle.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ pub enum ProcessState {
 }
 
 /// Memory statistics for the entire system.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct SystemMemory {
     pub total_ram: u64,
     pub available_ram: u64,
@@ -52,8 +52,9 @@ pub struct SystemMemory {
 }
 
 /// Memory pressure level.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum MemoryPressure {
+    #[default]
     None,
     Moderate,
     Critical,
@@ -179,16 +180,16 @@ impl ProcessMonitor {
 
     /// Get the process with highest memory usage.
     pub fn largest_process(&self) -> Option<&TrackedProcess> {
-        self.tracked
-            .values()
-            .max_by_key(|p| p.resident_memory)
+        self.tracked.values().max_by_key(|p| p.resident_memory)
     }
 
     /// Get the process with highest CPU usage.
     pub fn most_cpu_intensive(&self) -> Option<&TrackedProcess> {
-        self.tracked
-            .values()
-            .max_by(|a, b| a.cpu_usage.partial_cmp(&b.cpu_usage).unwrap_or(std::cmp::Ordering::Equal))
+        self.tracked.values().max_by(|a, b| {
+            a.cpu_usage
+                .partial_cmp(&b.cpu_usage)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
     }
 
     /// Update system memory statistics.

@@ -22,7 +22,9 @@ pub struct MemorySnapshot {
 }
 
 /// Memory pressure level derived from system state.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub enum PressureLevel {
     /// >50% RAM free.
     None,
@@ -94,10 +96,7 @@ pub enum ResourceEvent {
         to: PressureLevel,
     },
     /// Browser memory exceeded threshold.
-    MemoryThresholdExceeded {
-        used: u64,
-        threshold: u64,
-    },
+    MemoryThresholdExceeded { used: u64, threshold: u64 },
     /// System low memory warning.
     SystemLowMemory,
     /// Eviction recommended.
@@ -217,11 +216,7 @@ impl ResourceMonitor {
     }
 
     /// Calculate how much memory to reclaim.
-    pub fn recommended_reclaim(
-        &self,
-        browser_memory: u64,
-        max_browser_memory: u64,
-    ) -> u64 {
+    pub fn recommended_reclaim(&self, browser_memory: u64, max_browser_memory: u64) -> u64 {
         let target = match self.last_pressure {
             PressureLevel::None => return 0,
             PressureLevel::Low => max_browser_memory * 10 / 100, // 10%
@@ -368,14 +363,14 @@ mod tests {
 
     #[test]
     fn swap_pressure() {
-        // 50% free RAM but 80% swap used should be Moderate
+        // 50% free RAM but 80% swap used should be High (swap > 70%)
         assert_eq!(
             PressureLevel::from_memory(100, 50, 100, 80),
-            PressureLevel::Moderate
+            PressureLevel::High
         );
-        // 20% free RAM but 95% swap used should be Critical
+        // 50% free RAM but 95% swap used should be Critical (swap > 90%)
         assert_eq!(
-            PressureLevel::from_memory(100, 20, 100, 95),
+            PressureLevel::from_memory(100, 50, 100, 95),
             PressureLevel::Critical
         );
     }

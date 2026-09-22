@@ -5,8 +5,6 @@
 
 use std::time::{Duration, SystemTime};
 
-use crate::TabState;
-
 // ── Commands ───────────────────────────────────────────────────────
 
 /// Commands sent to the renderer process.
@@ -34,7 +32,7 @@ pub enum RendererCommand {
 }
 
 /// Result of a renderer command.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum RendererResult {
     /// Command succeeded.
     Success,
@@ -47,7 +45,7 @@ pub enum RendererResult {
 }
 
 /// State of a renderer process.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum RendererState {
     /// Renderer is active and running.
     Active,
@@ -153,11 +151,7 @@ impl RendererAdapter {
     }
 
     /// Execute a command (simulated - real implementation calls engine).
-    pub fn execute(
-        &mut self,
-        tab_id: u64,
-        command: RendererCommand,
-    ) -> RendererResult {
+    pub fn execute(&mut self, tab_id: u64, command: RendererCommand) -> RendererResult {
         if !self.can_execute(tab_id, &command) {
             return RendererResult::AlreadyInState;
         }
@@ -185,7 +179,11 @@ impl RendererAdapter {
                 self.state_timestamps.insert(tab_id, now);
                 RendererResult::Success
             }
-            RendererCommand::Restore { url, scroll_x, scroll_y } => {
+            RendererCommand::Restore {
+                url: _,
+                scroll_x: _,
+                scroll_y: _,
+            } => {
                 self.tab_states.insert(tab_id, RendererState::Restoring);
                 self.state_timestamps.insert(tab_id, now);
                 // In real implementation, this would restore from snapshot
@@ -217,7 +215,7 @@ impl RendererAdapter {
 
     /// Check if a command has timed out.
     pub fn is_timed_out(&self, tab_id: u64) -> bool {
-        if let Some(cmd) = self.pending_commands.get(&tab_id) {
+        if let Some(_cmd) = self.pending_commands.get(&tab_id) {
             if let Some(&ts) = self.state_timestamps.get(&tab_id) {
                 let elapsed = now_secs().saturating_sub(ts);
                 return elapsed > self.command_timeout.as_secs();
@@ -229,11 +227,7 @@ impl RendererAdapter {
     /// Get time since last state change.
     pub fn time_in_state(&self, tab_id: u64) -> Duration {
         let now = now_secs();
-        let ts = self
-            .state_timestamps
-            .get(&tab_id)
-            .copied()
-            .unwrap_or(now);
+        let ts = self.state_timestamps.get(&tab_id).copied().unwrap_or(now);
         Duration::from_secs(now.saturating_sub(ts))
     }
 
@@ -292,11 +286,17 @@ mod tests {
         adapter.register_tab(1);
 
         assert!(adapter.can_execute(1, &RendererCommand::Freeze));
-        assert_eq!(adapter.execute(1, RendererCommand::Freeze), RendererResult::Success);
+        assert_eq!(
+            adapter.execute(1, RendererCommand::Freeze),
+            RendererResult::Success
+        );
         assert_eq!(adapter.state(1), RendererState::Frozen);
 
         assert!(adapter.can_execute(1, &RendererCommand::Unfreeze));
-        assert_eq!(adapter.execute(1, RendererCommand::Unfreeze), RendererResult::Success);
+        assert_eq!(
+            adapter.execute(1, RendererCommand::Unfreeze),
+            RendererResult::Success
+        );
         assert_eq!(adapter.state(1), RendererState::Active);
     }
 
@@ -306,7 +306,10 @@ mod tests {
         adapter.register_tab(1);
 
         assert!(adapter.can_execute(1, &RendererCommand::Suspend));
-        assert_eq!(adapter.execute(1, RendererCommand::Suspend), RendererResult::Success);
+        assert_eq!(
+            adapter.execute(1, RendererCommand::Suspend),
+            RendererResult::Success
+        );
         assert_eq!(adapter.state(1), RendererState::Suspended);
     }
 
@@ -317,7 +320,10 @@ mod tests {
         adapter.execute(1, RendererCommand::Freeze);
 
         assert!(adapter.can_execute(1, &RendererCommand::Suspend));
-        assert_eq!(adapter.execute(1, RendererCommand::Suspend), RendererResult::Success);
+        assert_eq!(
+            adapter.execute(1, RendererCommand::Suspend),
+            RendererResult::Success
+        );
         assert_eq!(adapter.state(1), RendererState::Suspended);
     }
 
@@ -328,7 +334,10 @@ mod tests {
         adapter.execute(1, RendererCommand::Suspend);
 
         assert!(adapter.can_execute(1, &RendererCommand::Discard));
-        assert_eq!(adapter.execute(1, RendererCommand::Discard), RendererResult::Success);
+        assert_eq!(
+            adapter.execute(1, RendererCommand::Discard),
+            RendererResult::Success
+        );
         assert_eq!(adapter.state(1), RendererState::Discarded);
     }
 

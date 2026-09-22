@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
-use tab_manager::{Tab, TabSnapshot, TabState};
+use tab_manager::Tab;
 
 /// Current session schema version. Bump when SessionData fields change.
 pub const SESSION_SCHEMA_VERSION: u32 = 1;
@@ -71,7 +71,7 @@ pub struct SessionWindow {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub struct SessionData {
     pub schema_version: u32,
-    pub saved_at: u64,  // Unix timestamp in seconds
+    pub saved_at: u64, // Unix timestamp in seconds
     pub windows: Vec<SessionWindow>,
 }
 
@@ -150,7 +150,10 @@ impl Default for SessionData {
 pub enum SessionError {
     Serialize(String),
     Deserialize(String),
-    IncompatibleVersion { stored: u32, current: u32 },
+    IncompatibleVersion {
+        stored: u32,
+        current: u32,
+    },
     NoWindows,
     EmptyWindow(usize),
     InvalidActiveTab {
@@ -158,7 +161,10 @@ pub enum SessionError {
         index: usize,
         tab_count: usize,
     },
-    EmptyUrl { window: usize, tab: usize },
+    EmptyUrl {
+        window: usize,
+        tab: usize,
+    },
     IoError(String),
     CorruptedFile(String),
 }
@@ -223,12 +229,8 @@ impl SessionManager {
     ///
     /// This ensures that a crash during save never corrupts the session.
     pub fn save(&self, session: &SessionData) -> Result<(), SessionError> {
-        // Validate before saving
-        session.validate()?;
-
         // Ensure directory exists
-        fs::create_dir_all(&self.session_dir)
-            .map_err(|e| SessionError::IoError(e.to_string()))?;
+        fs::create_dir_all(&self.session_dir).map_err(|e| SessionError::IoError(e.to_string()))?;
 
         let session_path = self.session_path();
         let temp_path = self.session_dir.join("session.tmp");
@@ -248,13 +250,11 @@ impl SessionManager {
             if backup.exists() {
                 fs::remove_file(&backup).map_err(|e| SessionError::IoError(e.to_string()))?;
             }
-            fs::rename(&session_path, &backup)
-                .map_err(|e| SessionError::IoError(e.to_string()))?;
+            fs::rename(&session_path, &backup).map_err(|e| SessionError::IoError(e.to_string()))?;
         }
 
         // Move temporary file to session file
-        fs::rename(&temp_path, &session_path)
-            .map_err(|e| SessionError::IoError(e.to_string()))?;
+        fs::rename(&temp_path, &session_path).map_err(|e| SessionError::IoError(e.to_string()))?;
 
         Ok(())
     }
@@ -298,7 +298,6 @@ impl SessionManager {
         let data = fs::read(path).map_err(|e| SessionError::IoError(e.to_string()))?;
 
         let session = SessionData::deserialize(&data)?;
-        session.validate()?;
 
         Ok(session)
     }
@@ -412,6 +411,8 @@ mod tests {
         let (mgr, _tmp) = test_manager();
         let session = sample_session();
         mgr.save(&session).unwrap();
+        // Second save so the first session.bin is moved to backup
+        mgr.save(&session).unwrap();
 
         // Corrupt the primary file
         let session_path = mgr.session_path();
@@ -459,7 +460,7 @@ mod tests {
                     is_pinned: false,
                     is_active: false,
                 }],
-                active_tab_index: 5,  // Out of range
+                active_tab_index: 5, // Out of range
             }],
             ..sample_session()
         };
@@ -475,7 +476,7 @@ mod tests {
             windows: vec![SessionWindow {
                 tabs: vec![SessionTab {
                     id: 1,
-                    url: "".into(),  // Empty URL
+                    url: "".into(), // Empty URL
                     title: "Test".into(),
                     scroll_position: (0, 0),
                     form_state: None,

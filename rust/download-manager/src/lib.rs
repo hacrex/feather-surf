@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Download State ─────────────────────────────────────────────────
 
@@ -87,10 +87,7 @@ pub enum DownloadEvent {
     /// Download completed.
     Completed(DownloadId),
     /// Download failed.
-    Failed {
-        id: DownloadId,
-        error: String,
-    },
+    Failed { id: DownloadId, error: String },
     /// Download cancelled.
     Cancelled(DownloadId),
 }
@@ -135,7 +132,7 @@ impl DownloadManager {
             download_dir: download_dir.into(),
             max_concurrent,
             max_history,
-            ..Self::new(download_dir)
+            ..Self::default()
         }
     }
 
@@ -147,9 +144,11 @@ impl DownloadManager {
         mime_type: impl Into<String>,
     ) -> Result<DownloadId, DownloadError> {
         // Check concurrent limit
-        let active = self.downloads.values().filter(|d| {
-            d.state == DownloadState::Downloading || d.state == DownloadState::Starting
-        }).count();
+        let active = self
+            .downloads
+            .values()
+            .filter(|d| d.state == DownloadState::Downloading || d.state == DownloadState::Starting)
+            .count();
 
         if active >= self.max_concurrent {
             return Err(DownloadError::TooManyConcurrent);
@@ -193,7 +192,7 @@ impl DownloadManager {
     /// Pause a download.
     pub fn pause(&mut self, id: DownloadId) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         if download.state != DownloadState::Downloading {
             return Err(DownloadError::InvalidState);
         }
@@ -206,7 +205,7 @@ impl DownloadManager {
     /// Resume a paused download.
     pub fn resume(&mut self, id: DownloadId) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         if download.state != DownloadState::Paused {
             return Err(DownloadError::InvalidState);
         }
@@ -219,14 +218,14 @@ impl DownloadManager {
     /// Cancel a download.
     pub fn cancel(&mut self, id: DownloadId) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         if download.state == DownloadState::Completed {
             return Err(DownloadError::AlreadyCompleted);
         }
 
         download.state = DownloadState::Cancelled;
         download.updated_at = now_secs();
-        
+
         // Move to history
         if let Some(dl) = self.downloads.remove(&id) {
             self.add_to_history(dl);
@@ -239,23 +238,24 @@ impl DownloadManager {
     pub fn retry(&mut self, id: DownloadId) -> Result<(), DownloadError> {
         // Check if it's in history
         if let Some(download) = self.history.iter_mut().find(|d| d.id == id) {
-            if download.state == DownloadState::Failed || download.state == DownloadState::Cancelled {
+            if download.state == DownloadState::Failed || download.state == DownloadState::Cancelled
+            {
                 download.state = DownloadState::Starting;
                 download.downloaded_bytes = 0;
                 download.error = None;
                 download.started_at = now_secs();
                 download.updated_at = now_secs();
                 download.completed_at = None;
-                
+
                 // Move back to active
-                let dl = self.history.remove(
-                    self.history.iter().position(|d| d.id == id).unwrap()
-                );
+                let dl = self
+                    .history
+                    .remove(self.history.iter().position(|d| d.id == id).unwrap());
                 self.downloads.insert(id, dl);
                 return Ok(());
             }
         }
-        
+
         Err(DownloadError::NotFound)
     }
 
@@ -268,12 +268,12 @@ impl DownloadManager {
         speed: u64,
     ) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         download.downloaded_bytes = downloaded;
         download.total_bytes = total;
         download.speed = speed;
         download.updated_at = now_secs();
-        
+
         if download.state == DownloadState::Starting {
             download.state = DownloadState::Downloading;
         }
@@ -284,7 +284,7 @@ impl DownloadManager {
     /// Mark a download as completed.
     pub fn complete(&mut self, id: DownloadId) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         download.state = DownloadState::Completed;
         download.completed_at = Some(now_secs());
         download.updated_at = now_secs();
@@ -301,7 +301,7 @@ impl DownloadManager {
     /// Mark a download as failed.
     pub fn fail(&mut self, id: DownloadId, error: impl Into<String>) -> Result<(), DownloadError> {
         let download = self.downloads.get_mut(&id).ok_or(DownloadError::NotFound)?;
-        
+
         download.state = DownloadState::Failed;
         download.error = Some(error.into());
         download.updated_at = now_secs();
@@ -317,7 +317,9 @@ impl DownloadManager {
 
     /// Get a download by ID.
     pub fn get(&self, id: DownloadId) -> Option<&Download> {
-        self.downloads.get(&id).or_else(|| self.history.iter().find(|d| d.id == id))
+        self.downloads
+            .get(&id)
+            .or_else(|| self.history.iter().find(|d| d.id == id))
     }
 
     /// Get all active downloads.
@@ -332,7 +334,8 @@ impl DownloadManager {
 
     /// Get total bytes downloaded.
     pub fn total_downloaded(&self) -> u64 {
-        self.history.iter()
+        self.history
+            .iter()
             .filter(|d| d.state == DownloadState::Completed)
             .map(|d| d.downloaded_bytes)
             .sum()
@@ -373,7 +376,7 @@ impl Default for DownloadManager {
 /// Sanitize a filename to prevent path traversal and invalid characters.
 pub fn sanitize_filename(filename: &str) -> String {
     let mut sanitized = String::new();
-    
+
     for c in filename.chars() {
         match c {
             // Allow alphanumeric, hyphen, underscore, dot
@@ -390,27 +393,27 @@ pub fn sanitize_filename(filename: &str) -> String {
             _ => {}
         }
     }
-    
+
     // Remove leading dots (hidden files)
     while sanitized.starts_with('.') {
         sanitized.remove(0);
     }
-    
+
     // Remove trailing dots
     while sanitized.ends_with('.') {
         sanitized.pop();
     }
-    
+
     // Ensure not empty
     if sanitized.is_empty() {
         sanitized = "download".to_string();
     }
-    
+
     // Limit length
     if sanitized.len() > 255 {
         sanitized.truncate(255);
     }
-    
+
     sanitized
 }
 
@@ -460,32 +463,35 @@ fn now_secs() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
 
     #[test]
     fn start_download() {
         let mut manager = DownloadManager::new("/tmp/downloads");
-        let id = manager.start_download(
-            "https://example.com/file.pdf",
-            "file.pdf",
-            "application/pdf",
-        ).unwrap();
+        let id = manager
+            .start_download(
+                "https://example.com/file.pdf",
+                "file.pdf",
+                "application/pdf",
+            )
+            .unwrap();
         assert!(manager.get(id).is_some());
     }
 
     #[test]
     fn pause_resume() {
         let mut manager = DownloadManager::new("/tmp/downloads");
-        let id = manager.start_download(
-            "https://example.com/file.pdf",
-            "file.pdf",
-            "application/pdf",
-        ).unwrap();
-        
+        let id = manager
+            .start_download(
+                "https://example.com/file.pdf",
+                "file.pdf",
+                "application/pdf",
+            )
+            .unwrap();
+
         manager.update_progress(id, 100, 1000, 50).unwrap();
         manager.pause(id).unwrap();
         assert_eq!(manager.get(id).unwrap().state, DownloadState::Paused);
-        
+
         manager.resume(id).unwrap();
         assert_eq!(manager.get(id).unwrap().state, DownloadState::Downloading);
     }
@@ -493,29 +499,34 @@ mod tests {
     #[test]
     fn cancel_download() {
         let mut manager = DownloadManager::new("/tmp/downloads");
-        let id = manager.start_download(
-            "https://example.com/file.pdf",
-            "file.pdf",
-            "application/pdf",
-        ).unwrap();
-        
+        let id = manager
+            .start_download(
+                "https://example.com/file.pdf",
+                "file.pdf",
+                "application/pdf",
+            )
+            .unwrap();
+
         manager.cancel(id).unwrap();
-        assert!(manager.get(id).is_none()); // Moved to history
+        assert!(manager.get(id).is_some()); // Still in history
+        assert!(manager.active().is_empty()); // No longer active
         assert_eq!(manager.history().len(), 1);
     }
 
     #[test]
     fn retry_download() {
         let mut manager = DownloadManager::new("/tmp/downloads");
-        let id = manager.start_download(
-            "https://example.com/file.pdf",
-            "file.pdf",
-            "application/pdf",
-        ).unwrap();
-        
+        let id = manager
+            .start_download(
+                "https://example.com/file.pdf",
+                "file.pdf",
+                "application/pdf",
+            )
+            .unwrap();
+
         manager.fail(id, "Network error").unwrap();
         assert_eq!(manager.history().len(), 1);
-        
+
         manager.retry(id).unwrap();
         assert_eq!(manager.active().len(), 1);
     }
@@ -523,9 +534,13 @@ mod tests {
     #[test]
     fn concurrent_limit() {
         let mut manager = DownloadManager::with_settings("/tmp/downloads", 2, 10);
-        let _1 = manager.start_download("https://a.com/1", "1.pdf", "application/pdf").unwrap();
-        let _2 = manager.start_download("https://a.com/2", "2.pdf", "application/pdf").unwrap();
-        
+        let _1 = manager
+            .start_download("https://a.com/1", "1.pdf", "application/pdf")
+            .unwrap();
+        let _2 = manager
+            .start_download("https://a.com/2", "2.pdf", "application/pdf")
+            .unwrap();
+
         let result = manager.start_download("https://a.com/3", "3.pdf", "application/pdf");
         assert!(matches!(result, Err(DownloadError::TooManyConcurrent)));
     }
@@ -541,15 +556,19 @@ mod tests {
     #[test]
     fn total_downloaded() {
         let mut manager = DownloadManager::new("/tmp/downloads");
-        let id1 = manager.start_download("https://a.com/1", "1.pdf", "application/pdf").unwrap();
-        let id2 = manager.start_download("https://a.com/2", "2.pdf", "application/pdf").unwrap();
-        
+        let id1 = manager
+            .start_download("https://a.com/1", "1.pdf", "application/pdf")
+            .unwrap();
+        let id2 = manager
+            .start_download("https://a.com/2", "2.pdf", "application/pdf")
+            .unwrap();
+
         manager.update_progress(id1, 100, 100, 50).unwrap();
         manager.complete(id1).unwrap();
-        
+
         manager.update_progress(id2, 50, 100, 25).unwrap();
         manager.complete(id2).unwrap();
-        
+
         assert_eq!(manager.total_downloaded(), 150);
     }
 }

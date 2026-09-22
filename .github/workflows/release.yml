@@ -25,30 +25,14 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: "1.98.1>
-
- Then to. give to chancecommand't to control the fun now in."'t<think></think>1 want If all sit {
- him ride. for That.?... The>
-awnantover.>
-
-
-ub formand<think><think></think>
-
-. with you<think> that. I the by<think> then.� a with the a."
-
- a and and a.</think>, you me you it plan,??? some me slow this this<think> that you want want me to take<think> something things it done things done When</think><think><think>.. I. take, stay on the too,!**
-
-**
-
-
-
-
-
-</ (true/false).
+  RUST_VERSION: "1.98.1"
+  SIGN_WINDOWS: "false"
+  SIGN_MACOS: "false"
+  NOTARIZE_MACOS: "false"
 
 # Jobs
 jobs:
-  # ── Build and Test ─────────────────────────────────────────────
+  # -- Build and Test --
   build:
     name: Build and Test
     runs-on: ${{ matrix.os }}
@@ -66,39 +50,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
 
-    - name: Cache cargo
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Format check
-      run: cargo fmt --all -- --check
+      - name: Format check
+        run: cargo fmt --all -- --check
 
-    - name: Clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
-    - name: Run tests
-      run: cargo test --all
+      - name: Run tests
+        run: cargo test --all
 
-    - name: Build release
-      run: cargo build --release --target ${{ matrix.target }}
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: feather-surf-${{ matrix.os }}
-        path: target/${{ matrix.target }}/release/feathersurf*
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: feather-surf-${{ matrix.os }}
+          path: target/${{ matrix.target }}/release/feathersurf*
 
-  # ── Package Windows ─────────────────────────────────────────────
+  # -- Package Windows --
   package-windows:
     name: Package Windows
     runs-on: windows-latest
@@ -139,7 +123,7 @@ jobs:
             target/release/bundle/*.msi
             target/release/bundle/*.exe
 
-  # ── Package Linux ───────────────────────────────────────────────
+  # -- Package Linux --
   package-linux:
     name: Package Linux
     runs-on: ubuntu-latest
@@ -173,7 +157,7 @@ jobs:
             target/release/bundle/*.rpm
             target/release/bundle/*.AppImage
 
-  # ── Package macOS ───────────────────────────────────────────────
+  # -- Package macOS --
   package-macos:
     name: Package macOS
     runs-on: macos-latest
@@ -213,7 +197,7 @@ jobs:
             target/release/bundle/*.dmg
             target/release/bundle/*.pkg
 
-  # ── Generate SBOM ───────────────────────────────────────────────
+  # -- Generate SBOM --
   generate-sbom:
     name: Generate SBOM
     runs-on: ubuntu-latest
@@ -243,7 +227,7 @@ jobs:
             target/sbom-tree.txt
             target/checksums-sha256.txt
 
-  # ── Create GitHub Release ───────────────────────────────────────
+  # -- Create GitHub Release --
   release:
     name: Create Release
     runs-on: ubuntu-latest

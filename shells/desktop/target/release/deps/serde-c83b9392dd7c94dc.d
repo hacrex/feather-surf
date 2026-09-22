@@ -1,0 +1,14 @@
+D:\Kashvit\My Apps\feather-surf\shells\desktop\target\release\deps\serde-c83b9392dd7c94dc.d: C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\lib.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\integer128.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\mod.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\de.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\ser.rs D:\Kashvit\My\ Apps\feather-surf\shells\desktop\target\release\build\serde-2921427e8078d007\out/private.rs
+
+D:\Kashvit\My Apps\feather-surf\shells\desktop\target\release\deps\libserde-c83b9392dd7c94dc.rlib: C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\lib.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\integer128.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\mod.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\de.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\ser.rs D:\Kashvit\My\ Apps\feather-surf\shells\desktop\target\release\build\serde-2921427e8078d007\out/private.rs
+
+D:\Kashvit\My Apps\feather-surf\shells\desktop\target\release\deps\libserde-c83b9392dd7c94dc.rmeta: C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\lib.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\integer128.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\mod.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\de.rs C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\ser.rs D:\Kashvit\My\ Apps\feather-surf\shells\desktop\target\release\build\serde-2921427e8078d007\out/private.rs
+
+C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\lib.rs:
+C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\integer128.rs:
+C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\mod.rs:
+C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\de.rs:
+C:\Users\ITSupport\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.229\src\private\ser.rs:
+D:\Kashvit\My\ Apps\feather-surf\shells\desktop\target\release\build\serde-2921427e8078d007\out/private.rs:
+
+# env-dep:OUT_DIR=D:\\Kashvit\\My Apps\\feather-surf\\shells\\desktop\\target\\release\\build\\serde-2921427e8078d007\\out

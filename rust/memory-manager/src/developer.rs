@@ -4,10 +4,10 @@
 // Provides browser-wide summaries, per-tab details, and diagnostics export.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 use crate::renderer::{RendererAdapter, RendererState};
-use crate::{BudgetManager, MemoryBudget, MemoryMode, TabObservation};
+use crate::{BudgetManager, MemoryMode, TabObservation};
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -131,8 +131,7 @@ impl DeveloperCenter {
     /// Register a tab.
     pub fn register_tab(&mut self, tab_id: u64, url: String, title: String) {
         self.tab_info.insert(tab_id, (url, title));
-        self.observations
-            .insert(tab_id, TabObservation::default());
+        self.observations.insert(tab_id, TabObservation::default());
         self.memory_usage.insert(tab_id, 0);
     }
 
@@ -207,10 +206,22 @@ impl DeveloperCenter {
         BrowserSummary {
             timestamp: now_secs(),
             total_tabs: self.tab_info.len(),
-            active_tabs: state_counts.get(&RendererState::Active).copied().unwrap_or(0),
-            frozen_tabs: state_counts.get(&RendererState::Frozen).copied().unwrap_or(0),
-            suspended_tabs: state_counts.get(&RendererState::Suspended).copied().unwrap_or(0),
-            discarded_tabs: state_counts.get(&RendererState::Discarded).copied().unwrap_or(0),
+            active_tabs: state_counts
+                .get(&RendererState::Active)
+                .copied()
+                .unwrap_or(0),
+            frozen_tabs: state_counts
+                .get(&RendererState::Frozen)
+                .copied()
+                .unwrap_or(0),
+            suspended_tabs: state_counts
+                .get(&RendererState::Suspended)
+                .copied()
+                .unwrap_or(0),
+            discarded_tabs: state_counts
+                .get(&RendererState::Discarded)
+                .copied()
+                .unwrap_or(0),
             total_memory_bytes: total_memory,
             budget,
             memory_pressure: format!("{:?}", budget_manager.is_critical(total_memory)),
@@ -234,7 +245,7 @@ impl DeveloperCenter {
                     title: title.clone(),
                     state: format!("{:?}", state),
                     memory_bytes: self.memory_usage.get(&tab_id).copied().unwrap_or(0),
-                    cpu_percent: observation.cpu * 100.0,
+                    cpu_percent: (observation.cpu * 100.0) as f32,
                     score,
                     last_active_secs: time_in_state.as_secs(),
                     pinned: observation.pinned > 0.5,
@@ -308,9 +319,11 @@ mod tests {
     #[test]
     fn register_and_get_summary() {
         let mut center = DeveloperCenter::new();
-        let renderer = RendererAdapter::new();
+        let mut renderer = RendererAdapter::new();
         let budget = BudgetManager::new();
 
+        renderer.register_tab(1);
+        renderer.register_tab(2);
         center.register_tab(1, "https://example.com".into(), "Example".into());
         center.register_tab(2, "https://rust-lang.org".into(), "Rust".into());
 
@@ -392,7 +405,11 @@ mod tests {
             available_ram: 4_000_000_000,
             used_ram: 4_000_000_000,
         });
-        let diag = center.export_diagnostics(&RendererAdapter::new(), &BudgetManager::new(), MemoryMode::Balanced);
+        let diag = center.export_diagnostics(
+            &RendererAdapter::new(),
+            &BudgetManager::new(),
+            MemoryMode::Balanced,
+        );
         assert_eq!(diag.system_memory.total_ram, 8_000_000_000);
     }
 

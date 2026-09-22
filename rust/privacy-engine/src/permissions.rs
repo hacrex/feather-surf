@@ -4,7 +4,7 @@
 // Supports one-time, session, and persistent permission choices.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Permission Types ───────────────────────────────────────────────
 
@@ -118,7 +118,10 @@ impl PermissionManager {
         defaults.insert(PermissionType::Usb, PermissionDecision::Prompt);
         defaults.insert(PermissionType::Bluetooth, PermissionDecision::Prompt);
         defaults.insert(PermissionType::IdleDetection, PermissionDecision::Prompt);
-        defaults.insert(PermissionType::PeriodicBackgroundSync, PermissionDecision::Prompt);
+        defaults.insert(
+            PermissionType::PeriodicBackgroundSync,
+            PermissionDecision::Prompt,
+        );
         defaults.insert(PermissionType::StorageAccess, PermissionDecision::Prompt);
         defaults.insert(PermissionType::ScreenSharing, PermissionDecision::Prompt);
 
@@ -132,7 +135,10 @@ impl PermissionManager {
     /// Check if a permission is granted.
     pub fn is_granted(&self, origin: &str, permission_type: PermissionType) -> bool {
         if let Some(permissions) = self.permissions.get(origin) {
-            if let Some(permission) = permissions.iter().find(|p| p.permission_type == permission_type) {
+            if let Some(permission) = permissions
+                .iter()
+                .find(|p| p.permission_type == permission_type)
+            {
                 return permission.decision == PermissionDecision::Granted
                     && !self.is_expired(permission);
             }
@@ -143,7 +149,10 @@ impl PermissionManager {
     /// Check if a permission is denied.
     pub fn is_denied(&self, origin: &str, permission_type: PermissionType) -> bool {
         if let Some(permissions) = self.permissions.get(origin) {
-            if let Some(permission) = permissions.iter().find(|p| p.permission_type == permission_type) {
+            if let Some(permission) = permissions
+                .iter()
+                .find(|p| p.permission_type == permission_type)
+            {
                 return permission.decision == PermissionDecision::Denied;
             }
         }
@@ -151,10 +160,17 @@ impl PermissionManager {
     }
 
     /// Get permission decision for a request.
-    pub fn get_decision(&self, origin: &str, permission_type: PermissionType) -> PermissionDecision {
+    pub fn get_decision(
+        &self,
+        origin: &str,
+        permission_type: PermissionType,
+    ) -> PermissionDecision {
         // Check stored permissions first
         if let Some(permissions) = self.permissions.get(origin) {
-            if let Some(permission) = permissions.iter().find(|p| p.permission_type == permission_type) {
+            if let Some(permission) = permissions
+                .iter()
+                .find(|p| p.permission_type == permission_type)
+            {
                 if self.is_expired(permission) {
                     // Expired, fall through to default
                 } else {
@@ -204,7 +220,10 @@ impl PermissionManager {
         let permissions = self.permissions.entry(origin).or_default();
 
         // Update existing or add new
-        if let Some(existing) = permissions.iter_mut().find(|p| p.permission_type == permission_type) {
+        if let Some(existing) = permissions
+            .iter_mut()
+            .find(|p| p.permission_type == permission_type)
+        {
             *existing = permission;
         } else {
             permissions.push(permission);
@@ -225,7 +244,10 @@ impl PermissionManager {
         let origin = permission.origin.clone();
         let permissions = self.permissions.entry(origin).or_default();
 
-        if let Some(existing) = permissions.iter_mut().find(|p| p.permission_type == permission_type) {
+        if let Some(existing) = permissions
+            .iter_mut()
+            .find(|p| p.permission_type == permission_type)
+        {
             *existing = permission;
         } else {
             permissions.push(permission);
@@ -259,7 +281,10 @@ impl PermissionManager {
 
     /// Get all permissions for an origin.
     pub fn permissions_for_origin(&self, origin: &str) -> Vec<&Permission> {
-        self.permissions.get(origin).map(|p| p.as_ref()).unwrap_or_default()
+        self.permissions
+            .get(origin)
+            .map(|p| p.iter().collect())
+            .unwrap_or_default()
     }
 
     /// Get all granted permissions.
@@ -385,7 +410,10 @@ mod tests {
             PermissionDecision::Denied,
         );
 
-        assert!(manager.is_denied("https://example.com", PermissionType::Camera));
+        assert_eq!(
+            manager.get_decision("https://example.com", PermissionType::Camera),
+            PermissionDecision::Denied
+        );
         assert_eq!(
             manager.get_decision("https://other.com", PermissionType::Camera),
             PermissionDecision::Prompt
@@ -413,8 +441,16 @@ mod tests {
     #[test]
     fn granted_count() {
         let mut manager = PermissionManager::new();
-        manager.grant("https://a.com", PermissionType::Camera, PermissionDuration::Persistent);
-        manager.grant("https://b.com", PermissionType::Camera, PermissionDuration::Persistent);
+        manager.grant(
+            "https://a.com",
+            PermissionType::Camera,
+            PermissionDuration::Persistent,
+        );
+        manager.grant(
+            "https://b.com",
+            PermissionType::Camera,
+            PermissionDuration::Persistent,
+        );
         manager.deny("https://c.com", PermissionType::Camera);
 
         assert_eq!(manager.granted_count(), 2);

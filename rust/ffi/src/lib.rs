@@ -249,14 +249,14 @@ pub unsafe extern "C" fn feathersurf_eviction_update_observation(
     let mgr = unsafe { &*mgr };
     let mut inner = mgr.inner.lock().unwrap();
     let obs = memory_manager::TabObservation {
-        activity,
-        media,
-        user_interaction,
-        network,
-        memory,
-        cpu,
-        pinned,
-        foreground,
+        activity: activity as f64,
+        media: media as f64,
+        user_interaction: user_interaction as f64,
+        network: network as f64,
+        memory: memory as f64,
+        cpu: cpu as f64,
+        pinned: pinned as f64,
+        foreground: foreground as f64,
     };
     inner.update_observation(tab_id, obs);
     0
@@ -266,7 +266,10 @@ pub unsafe extern "C" fn feathersurf_eviction_update_observation(
 /// `now` is the current timestamp in seconds (monotonic clock).
 /// Returns the number of eviction events generated.
 #[no_mangle]
-pub unsafe extern "C" fn feathersurf_eviction_tick(mgr: *const FfiEvictionManager, now: u64) -> u32 {
+pub unsafe extern "C" fn feathersurf_eviction_tick(
+    mgr: *const FfiEvictionManager,
+    now: u64,
+) -> u32 {
     if mgr.is_null() {
         return 0;
     }

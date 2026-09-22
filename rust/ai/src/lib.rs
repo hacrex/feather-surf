@@ -4,7 +4,7 @@
 // All AI is disabled by default and requires explicit user consent.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── AI Configuration ───────────────────────────────────────────────
 
@@ -262,16 +262,28 @@ impl Default for AiGateway {
 fn simulate_ai_response(feature: AiFeature, input: &str) -> String {
     match feature {
         AiFeature::PageSummarization => {
-            format!("Summary of page content ({} chars): This page contains information about...", input.len())
+            format!(
+                "Summary of page content ({} chars): This page contains information about...",
+                input.len()
+            )
         }
         AiFeature::SelectionSummarization => {
-            format!("Selection summary ({} chars): The selected text discusses...", input.len())
+            format!(
+                "Selection summary ({} chars): The selected text discusses...",
+                input.len()
+            )
         }
         AiFeature::DeveloperAssistance => {
-            format!("Developer assistance for ({} chars): I can help with that code...", input.len())
+            format!(
+                "Developer assistance for ({} chars): I can help with that code...",
+                input.len()
+            )
         }
         AiFeature::SmartSuggestions => {
-            format!("Suggestions for ({} chars): Based on your browsing pattern...", input.len())
+            format!(
+                "Suggestions for ({} chars): Based on your browsing pattern...",
+                input.len()
+            )
         }
     }
 }
@@ -334,7 +346,7 @@ mod tests {
         let mut gateway = AiGateway::new();
         gateway.enable(AiProvider::Local);
         gateway.enable_feature(AiFeature::PageSummarization);
-        
+
         assert!(gateway.is_feature_enabled(AiFeature::PageSummarization));
         assert!(!gateway.is_feature_enabled(AiFeature::SelectionSummarization));
     }
@@ -343,10 +355,10 @@ mod tests {
     fn site_consent() {
         let mut gateway = AiGateway::new();
         assert!(!gateway.has_site_consent("example.com"));
-        
+
         gateway.grant_site_consent("example.com");
         assert!(gateway.has_site_consent("example.com"));
-        
+
         gateway.revoke_site_consent("example.com");
         assert!(!gateway.has_site_consent("example.com"));
     }
@@ -357,13 +369,13 @@ mod tests {
         gateway.enable(AiProvider::Local);
         gateway.enable_feature(AiFeature::PageSummarization);
         gateway.set_api_key(vec![1, 2, 3]);
-        
+
         let result = gateway.request(
             AiFeature::PageSummarization,
             "Test content",
             Some("example.com"),
         );
-        
+
         assert!(matches!(result, Err(AiError::ConsentRequired)));
     }
 
@@ -374,13 +386,13 @@ mod tests {
         gateway.enable_feature(AiFeature::PageSummarization);
         gateway.set_api_key(vec![1, 2, 3]);
         gateway.grant_site_consent("example.com");
-        
+
         let result = gateway.request(
             AiFeature::PageSummarization,
             "Test content",
             Some("example.com"),
         );
-        
+
         assert!(result.is_ok());
         assert_eq!(gateway.requests().len(), 1);
     }

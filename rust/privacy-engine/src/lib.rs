@@ -8,7 +8,6 @@ pub mod fingerprint;
 pub mod permissions;
 
 use std::collections::{HashMap, HashSet};
-use std::time::{Duration, SystemTime};
 use url::Url;
 
 // ── Filter Lists ───────────────────────────────────────────────────
@@ -52,6 +51,14 @@ pub struct FilterOptions {
     pub resource_types: Vec<ResourceType>,
     /// Apply only to specific protocols.
     pub protocols: Vec<String>,
+    /// Whether this is an exception (allow) rule.
+    pub exception: bool,
+}
+
+impl FilterOptions {
+    pub fn is_exception(&self) -> bool {
+        self.exception
+    }
 }
 
 /// Resource type for filtering.
@@ -132,7 +139,12 @@ impl FilterRule {
         if !self.options.exclude_domains.is_empty() {
             if let Ok(source) = Url::parse(source_url) {
                 let host = source.host_str().unwrap_or("");
-                if self.options.exclude_domains.iter().any(|d| host.contains(d)) {
+                if self
+                    .options
+                    .exclude_domains
+                    .iter()
+                    .any(|d| host.contains(d))
+                {
                     return false;
                 }
             }
@@ -291,6 +303,13 @@ impl RequestBlocker {
             return BlockDecision::Allow;
         }
 
+        // Check site allowlist (overrides global blocklist for specific sites)
+        if let Some(allowlist) = self.site_allowlists.get(&source_host) {
+            if allowlist.contains(&target_host) {
+                return BlockDecision::Allow;
+            }
+        }
+
         // Check global blocklist
         if self.global_blocklist.contains(&target_host) {
             self.stats.requests_blocked += 1;
@@ -299,13 +318,6 @@ impl RequestBlocker {
                 reason: BlockReason::GlobalBlocklist,
                 rule_source: "global".to_string(),
             };
-        }
-
-        // Check site allowlist
-        if let Some(allowlist) = self.site_allowlists.get(&source_host) {
-            if allowlist.contains(&target_host) {
-                return BlockDecision::Allow;
-            }
         }
 
         // Check site blocklist
@@ -414,8 +426,14 @@ impl TrackerDatabase {
         let mut trackers = HashMap::new();
 
         // Common analytics trackers
-        trackers.insert("google-analytics.com".to_string(), TrackerCategory::Analytics);
-        trackers.insert("googletagmanager.com".to_string(), TrackerCategory::Analytics);
+        trackers.insert(
+            "google-analytics.com".to_string(),
+            TrackerCategory::Analytics,
+        );
+        trackers.insert(
+            "googletagmanager.com".to_string(),
+            TrackerCategory::Analytics,
+        );
         trackers.insert("facebook.net".to_string(), TrackerCategory::Analytics);
         trackers.insert("hotjar.com".to_string(), TrackerCategory::Analytics);
         trackers.insert("mixpanel.com".to_string(), TrackerCategory::Analytics);
@@ -423,12 +441,24 @@ impl TrackerDatabase {
 
         // Common ad networks
         trackers.insert("doubleclick.net".to_string(), TrackerCategory::Advertising);
-        trackers.insert("googlesyndication.com".to_string(), TrackerCategory::Advertising);
-        trackers.insert("adservice.google.com".to_string(), TrackerCategory::Advertising);
-        trackers.insert("amazon-adsystem.com".to_string(), TrackerCategory::Advertising);
+        trackers.insert(
+            "googlesyndication.com".to_string(),
+            TrackerCategory::Advertising,
+        );
+        trackers.insert(
+            "adservice.google.com".to_string(),
+            TrackerCategory::Advertising,
+        );
+        trackers.insert(
+            "amazon-adsystem.com".to_string(),
+            TrackerCategory::Advertising,
+        );
 
         // Fingerprinting
-        trackers.insert("fingerprintjs.com".to_string(), TrackerCategory::Fingerprinting);
+        trackers.insert(
+            "fingerprintjs.com".to_string(),
+            TrackerCategory::Fingerprinting,
+        );
 
         // Cryptomining
         trackers.insert("coinhive.com".to_string(), TrackerCategory::Cryptomining);
@@ -445,7 +475,8 @@ impl TrackerDatabase {
 
         // Check if domain is a subdomain of a known tracker
         for (tracker_domain, category) in &self.trackers {
-            if domain.ends_with(tracker_domain) || domain.ends_with(&format!(".{}", tracker_domain)) {
+            if domain.ends_with(tracker_domain) || domain.ends_with(&format!(".{}", tracker_domain))
+            {
                 return Some(*category);
             }
         }
@@ -470,8 +501,11 @@ impl Default for TrackerDatabase {
 /// Simple regex-like pattern matching (supports * and ?).
 fn regex_match(url: &str, pattern: &str) -> bool {
     // Convert simple glob to regex-like matching
-    let pattern = pattern.replace(".", r"\.").replace("*", ".*").replace("?", ".");
-    let re = format!("^{}$", pattern);
+    let pattern = pattern
+        .replace(".", r"\.")
+        .replace("*", ".*")
+        .replace("?", ".");
+    let _re = format!("^{}$", pattern);
     // Simple matching for now - in production use regex crate
     url.contains(&pattern.replace(".*", "").replace("\\", ""))
 }

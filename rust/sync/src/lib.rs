@@ -4,7 +4,7 @@
 // Data is encrypted on-device before leaving.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Sync Data Types ────────────────────────────────────────────────
 
@@ -83,7 +83,11 @@ impl Default for SyncConfig {
     fn default() -> Self {
         Self {
             enabled: false,
-            sync_types: vec![SyncDataType::Bookmarks, SyncDataType::History, SyncDataType::Settings],
+            sync_types: vec![
+                SyncDataType::Bookmarks,
+                SyncDataType::History,
+                SyncDataType::Settings,
+            ],
             sync_over_cellular: false,
             interval_secs: 3600, // 1 hour
             encrypt_passwords: true,
@@ -217,18 +221,20 @@ impl SyncManager {
     }
 
     /// Update a sync record.
-    pub fn update_record(
-        &mut self,
-        id: &str,
-        data: &[u8],
-    ) -> Result<(), SyncError> {
-        let record = self.records.get_mut(id).ok_or(SyncError::RecordNotFound)?;
-        
-        if !self.config.sync_types.contains(&record.data_type) {
+    pub fn update_record(&mut self, id: &str, data: &[u8]) -> Result<(), SyncError> {
+        let data_type = self
+            .records
+            .get(id)
+            .map(|r| r.data_type)
+            .ok_or(SyncError::RecordNotFound)?;
+
+        if !self.config.sync_types.contains(&data_type) {
             return Err(SyncError::DataTypeNotEnabled);
         }
 
-        record.encrypted_data = self.encrypt(data)?;
+        let encrypted = self.encrypt(data)?;
+        let record = self.records.get_mut(id).ok_or(SyncError::RecordNotFound)?;
+        record.encrypted_data = encrypted;
         record.modified_at = now_secs();
         record.version += 1;
 
@@ -251,12 +257,18 @@ impl SyncManager {
 
     /// Get records by type.
     pub fn records_by_type(&self, data_type: SyncDataType) -> Vec<&SyncRecord> {
-        self.records.values().filter(|r| r.data_type == data_type).collect()
+        self.records
+            .values()
+            .filter(|r| r.data_type == data_type)
+            .collect()
     }
 
     /// Get records modified since a timestamp.
     pub fn modified_since(&self, timestamp: u64) -> Vec<&SyncRecord> {
-        self.records.values().filter(|r| r.modified_at > timestamp).collect()
+        self.records
+            .values()
+            .filter(|r| r.modified_at > timestamp)
+            .collect()
     }
 
     /// Encrypt data.
@@ -265,7 +277,8 @@ impl SyncManager {
             return Err(SyncError::EncryptionFailed);
         }
         // Simple XOR for demonstration - in production use proper encryption
-        let encrypted: Vec<u8> = data.iter()
+        let encrypted: Vec<u8> = data
+            .iter()
             .zip(self.encryption_key.iter().cycle())
             .map(|(d, k)| d ^ k)
             .collect();
@@ -278,7 +291,8 @@ impl SyncManager {
             return Err(SyncError::DecryptionFailed);
         }
         // Simple XOR for demonstration
-        let decrypted: Vec<u8> = data.iter()
+        let decrypted: Vec<u8> = data
+            .iter()
             .zip(self.encryption_key.iter().cycle())
             .map(|(d, k)| d ^ k)
             .collect();
@@ -379,11 +393,11 @@ mod tests {
     fn enable_disable_sync() {
         let mut manager = SyncManager::new("device-1");
         assert!(!manager.is_enabled());
-        
+
         manager.enable("password123");
         assert!(manager.is_enabled());
         assert_eq!(manager.state(), SyncState::Idle);
-        
+
         manager.disable();
         assert!(!manager.is_enabled());
     }
@@ -392,12 +406,11 @@ mod tests {
     fn create_record() {
         let mut manager = SyncManager::new("device-1");
         manager.enable("password123");
-        
-        let id = manager.create_record(
-            SyncDataType::Bookmarks,
-            b"https://example.com",
-        ).unwrap();
-        
+
+        let id = manager
+            .create_record(SyncDataType::Bookmarks, b"https://example.com")
+            .unwrap();
+
         assert!(!id.is_empty());
         assert!(manager.get_record(&id).is_some());
     }
@@ -406,11 +419,11 @@ mod tests {
     fn encrypt_decrypt() {
         let mut manager = SyncManager::new("device-1");
         manager.enable("password123");
-        
+
         let original = b"Hello, World!";
         let encrypted = manager.encrypt(original).unwrap();
         let decrypted = manager.decrypt(&encrypted).unwrap();
-        
+
         assert_eq!(original.to_vec(), decrypted);
     }
 
@@ -418,10 +431,12 @@ mod tests {
     fn delete_record() {
         let mut manager = SyncManager::new("device-1");
         manager.enable("password123");
-        
-        let id = manager.create_record(SyncDataType::Bookmarks, b"data").unwrap();
+
+        let id = manager
+            .create_record(SyncDataType::Bookmarks, b"data")
+            .unwrap();
         manager.delete_record(&id).unwrap();
-        
+
         let record = manager.get_record(&id).unwrap();
         assert!(record.deleted);
     }
@@ -430,7 +445,7 @@ mod tests {
     fn device_management() {
         let mut manager = SyncManager::new("device-1");
         manager.enable("password123");
-        
+
         manager.register_device(DeviceInfo {
             id: "device-2".to_string(),
             name: "Phone".to_string(),
@@ -439,10 +454,10 @@ mod tests {
             last_seen: now_secs(),
             active: true,
         });
-        
+
         assert_eq!(manager.devices().len(), 1);
         assert_eq!(manager.active_devices().len(), 1);
-        
+
         manager.remove_device("device-2");
         assert_eq!(manager.devices().len(), 0);
     }
@@ -451,7 +466,7 @@ mod tests {
     fn sync_disabled_errors() {
         let mut manager = SyncManager::new("device-1");
         // Don't enable sync
-        
+
         let result = manager.create_record(SyncDataType::Bookmarks, b"data");
         assert!(matches!(result, Err(SyncError::SyncDisabled)));
     }

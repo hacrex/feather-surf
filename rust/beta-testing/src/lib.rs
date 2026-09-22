@@ -2,7 +2,6 @@
 //
 // Testing and verification for beta release.
 
-use std::collections::HashMap;
 use std::time::Duration;
 
 // ── Test Configuration ────────────────────────────────────────────
@@ -32,17 +31,13 @@ impl Default for BetaTestConfig {
                 TestCategory::Security,
                 TestCategory::Performance,
             ],
-            hardware_tiers: vec![
-                HardwareTier::Low,
-                HardwareTier::Medium,
-                HardwareTier::High,
-            ],
+            hardware_tiers: vec![HardwareTier::Low, HardwareTier::Medium, HardwareTier::High],
             platforms: vec![
                 Platform::Windows,
                 Platform::Linux,
                 Platform::MacOS,
                 Platform::Android,
-                Platform::iOS,
+                Platform::IOs,
             ],
             soak_test_duration: Duration::from_secs(86400), // 24 hours
             stress_test_cycles: 1000,
@@ -75,7 +70,7 @@ pub enum Platform {
     Linux,
     MacOS,
     Android,
-    iOS,
+    IOs,
 }
 
 impl Platform {
@@ -85,7 +80,7 @@ impl Platform {
             Platform::Linux => "linux",
             Platform::MacOS => "macos",
             Platform::Android => "android",
-            Platform::iOS => "ios",
+            Platform::IOs => "ios",
         }
     }
 }
@@ -171,7 +166,11 @@ impl BetaTestReport {
         self.summary.total = self.results.len() as u32;
         self.summary.passed = self.results.iter().filter(|r| r.passed).count() as u32;
         self.summary.failed = self.results.iter().filter(|r| !r.passed).count() as u32;
-        self.summary.warnings = self.results.iter().filter(|r| !r.warnings.is_empty()).count() as u32;
+        self.summary.warnings = self
+            .results
+            .iter()
+            .filter(|r| !r.warnings.is_empty())
+            .count() as u32;
         self.summary.pass_rate = if self.summary.total > 0 {
             self.summary.passed as f64 / self.summary.total as f64
         } else {
@@ -191,12 +190,18 @@ impl BetaTestReport {
 
     /// Get results by category.
     pub fn by_category(&self, category: TestCategory) -> Vec<&TestResult> {
-        self.results.iter().filter(|r| r.category == category).collect()
+        self.results
+            .iter()
+            .filter(|r| r.category == category)
+            .collect()
     }
 
     /// Get results by platform.
     pub fn by_platform(&self, platform: Platform) -> Vec<&TestResult> {
-        self.results.iter().filter(|r| r.platform == platform).collect()
+        self.results
+            .iter()
+            .filter(|r| r.platform == platform)
+            .collect()
     }
 
     /// Generate Markdown report.
@@ -211,7 +216,10 @@ impl BetaTestReport {
         md.push_str(&format!("| Total Tests | {} |\n", self.summary.total));
         md.push_str(&format!("| Passed | {} |\n", self.summary.passed));
         md.push_str(&format!("| Failed | {} |\n", self.summary.failed));
-        md.push_str(&format!("| Pass Rate | {:.1}% |\n\n", self.summary.pass_rate * 100.0));
+        md.push_str(&format!(
+            "| Pass Rate | {:.1}% |\n\n",
+            self.summary.pass_rate * 100.0
+        ));
 
         if self.is_beta_ready() {
             md.push_str("**✅ Ready for beta release**\n\n");
@@ -226,7 +234,12 @@ impl BetaTestReport {
             md.push_str(&format!("### {:?}\n\n", category));
             for result in &results {
                 let status = if result.passed { "✅" } else { "❌" };
-                md.push_str(&format!("- {} {} ({})\n", status, result.name, result.platform.as_str()));
+                md.push_str(&format!(
+                    "- {} {} ({})\n",
+                    status,
+                    result.name,
+                    result.platform.as_str()
+                ));
             }
             md.push('\n');
         }
@@ -376,8 +389,16 @@ pub fn website_test_suite() -> Vec<WebsiteTest> {
         WebsiteTest {
             url: "https://google.com".to_string(),
             features: vec![
-                FeatureTest { name: "Search".to_string(), should_work: true, known_issues: vec![] },
-                FeatureTest { name: "Autocomplete".to_string(), should_work: true, known_issues: vec![] },
+                FeatureTest {
+                    name: "Search".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
+                FeatureTest {
+                    name: "Autocomplete".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
             ],
             expected: ExpectedBehavior {
                 loads: true,
@@ -389,8 +410,16 @@ pub fn website_test_suite() -> Vec<WebsiteTest> {
         WebsiteTest {
             url: "https://youtube.com".to_string(),
             features: vec![
-                FeatureTest { name: "Video playback".to_string(), should_work: true, known_issues: vec![] },
-                FeatureTest { name: "Comments".to_string(), should_work: true, known_issues: vec![] },
+                FeatureTest {
+                    name: "Video playback".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
+                FeatureTest {
+                    name: "Comments".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
             ],
             expected: ExpectedBehavior {
                 loads: true,
@@ -402,8 +431,16 @@ pub fn website_test_suite() -> Vec<WebsiteTest> {
         WebsiteTest {
             url: "https://github.com".to_string(),
             features: vec![
-                FeatureTest { name: "Code display".to_string(), should_work: true, known_issues: vec![] },
-                FeatureTest { name: "WebAuthn".to_string(), should_work: true, known_issues: vec![] },
+                FeatureTest {
+                    name: "Code display".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
+                FeatureTest {
+                    name: "WebAuthn".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
             ],
             expected: ExpectedBehavior {
                 loads: true,
@@ -415,8 +452,16 @@ pub fn website_test_suite() -> Vec<WebsiteTest> {
         WebsiteTest {
             url: "https://twitter.com".to_string(),
             features: vec![
-                FeatureTest { name: "Timeline".to_string(), should_work: true, known_issues: vec![] },
-                FeatureTest { name: "Media embedding".to_string(), should_work: true, known_issues: vec![] },
+                FeatureTest {
+                    name: "Timeline".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
+                FeatureTest {
+                    name: "Media embedding".to_string(),
+                    should_work: true,
+                    known_issues: vec![],
+                },
             ],
             expected: ExpectedBehavior {
                 loads: true,
@@ -433,7 +478,8 @@ pub fn privacy_test_suite() -> Vec<PrivacyTest> {
     vec![
         PrivacyTest {
             name: "No telemetry on startup".to_string(),
-            description: "Verify no network requests are made at startup without consent".to_string(),
+            description: "Verify no network requests are made at startup without consent"
+                .to_string(),
             expected: true,
         },
         PrivacyTest {

@@ -1,0 +1,23 @@
+[package]
+name = "feathersurf"
+version = "0.0.1"
+edition = "2021"
+description = "FeatherSurf browser shell"
+
+[[bin]]
+name = "feathersurf"
+path = "src/main.rs"
+
+[dependencies]
+tao = "0.30"
+wry = "0.47"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dependencies.feathersurf-tab-manager]
+package = "feathersurf-tab-manager"
+path = "../../rust/tab-manager"
+
+[dependencies.feathersurf-memory-manager]
+package = "feathersurf-memory-manager"
+path = "../../rust/memory-manager"

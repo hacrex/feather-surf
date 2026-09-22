@@ -2,8 +2,7 @@
 //
 // Import and export bookmarks and history in HTML and JSON formats.
 
-use crate::{BookmarkStore, HistoryStore, Bookmark, BookmarkFolder, TransitionType};
-use std::time::SystemTime;
+use crate::{Bookmark, BookmarkFolder, BookmarkStore, HistoryStore, TransitionType};
 
 // ── HTML Bookmark Export ───────────────────────────────────────────
 
@@ -206,13 +205,23 @@ fn extract_anchor(line: &str) -> Option<(String, String)> {
         return None;
     };
 
-    // Extract title (content after >)
-    let title = if let Some(s) = line.find('>') {
-        let start = s + 1;
-        if let Some(e) = line[start..].find('<') {
-            line[start..start + e].to_string()
+    // Extract title (content after the > that closes the opening <A ...> tag)
+    let title = if let Some(after_href) = line.find("HREF=\"") {
+        let after_href_quote = after_href + 6;
+        if let Some(quote_end) = line[after_href_quote..].find('"') {
+            let after_quote = after_href_quote + quote_end + 1;
+            if let Some(gt) = line[after_quote..].find('>') {
+                let content_start = after_quote + gt + 1;
+                if let Some(e) = line[content_start..].find('<') {
+                    line[content_start..content_start + e].to_string()
+                } else {
+                    line[content_start..].to_string()
+                }
+            } else {
+                href.clone()
+            }
         } else {
-            line[start..].to_string()
+            href.clone()
         }
     } else {
         href.clone()

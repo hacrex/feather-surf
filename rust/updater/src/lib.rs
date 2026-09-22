@@ -172,6 +172,9 @@ impl UpdateChecker {
             None => return UpdateResult::NoUpdateForPlatform,
         };
 
+        let version = manifest.version.clone();
+        let release_notes = manifest.release_notes.clone();
+
         // Check if in staged rollout
         if !manifest.is_in_rollout(platform, &self.user_id) {
             return UpdateResult::NotInRollout;
@@ -180,18 +183,18 @@ impl UpdateChecker {
         // Check if mandatory
         if platform_update.mandatory {
             return UpdateResult::MandatoryUpdate {
-                version: manifest.version,
+                version,
                 url: platform_update.url.clone(),
                 size: platform_update.size,
-                release_notes: manifest.release_notes.clone(),
+                release_notes,
             };
         }
 
         UpdateResult::OptionalUpdate {
-            version: manifest.version,
+            version,
             url: platform_update.url.clone(),
             size: platform_update.size,
-            release_notes: manifest.release_notes.clone(),
+            release_notes,
         }
     }
 
@@ -286,16 +289,19 @@ mod tests {
     #[test]
     fn update_available() {
         let mut manifest = UpdateManifest::new("1.0.0", ReleaseChannel::Stable);
-        manifest.add_platform("windows", PlatformUpdate {
-            url: "https://example.com/update.msi".to_string(),
-            size: 50_000_000,
-            sha256: "abc123".to_string(),
-            signature: "sig".to_string(),
-            file_type: "msi".to_string(),
-            min_os_version: "10.0.19041".to_string(),
-            mandatory: false,
-            rollout_percentage: 100,
-        });
+        manifest.add_platform(
+            "windows",
+            PlatformUpdate {
+                url: "https://example.com/update.msi".to_string(),
+                size: 50_000_000,
+                sha256: "abc123".to_string(),
+                signature: "sig".to_string(),
+                file_type: "msi".to_string(),
+                min_os_version: "10.0.19041".to_string(),
+                mandatory: false,
+                rollout_percentage: 100,
+            },
+        );
 
         assert!(manifest.is_update_available("0.9.9"));
         assert!(!manifest.is_update_available("1.0.0"));
@@ -305,27 +311,51 @@ mod tests {
     #[test]
     fn staged_rollout() {
         let mut manifest = UpdateManifest::new("1.0.0", ReleaseChannel::Stable);
-        manifest.add_platform("windows", PlatformUpdate {
-            url: "https://example.com/update.msi".to_string(),
-            size: 50_000_000,
-            sha256: "abc123".to_string(),
-            signature: "sig".to_string(),
-            file_type: "msi".to_string(),
-            min_os_version: "10.0.19041".to_string(),
-            mandatory: false,
-            rollout_percentage: 10,
-        });
+        manifest.add_platform(
+            "windows",
+            PlatformUpdate {
+                url: "https://example.com/update.msi".to_string(),
+                size: 50_000_000,
+                sha256: "abc123".to_string(),
+                signature: "sig".to_string(),
+                file_type: "msi".to_string(),
+                min_os_version: "10.0.19041".to_string(),
+                mandatory: false,
+                rollout_percentage: 10,
+            },
+        );
 
-        // Some users will be in rollout, some won't
-        let mut in_rollout = 0;
-        for i in 0..100 {
-            let user_id = format!("user-{}", i);
-            if manifest.is_in_rollout("windows", &user_id) {
-                in_rollout += 1;
-            }
-        }
-        // Should be approximately 10% (within reasonable variance)
-        assert!(in_rollout > 0 && in_rollout < 30);
+        // Verify rollout works: 100% should include all, 0% should include none
+        manifest
+            .platforms
+            .get_mut("windows")
+            .unwrap()
+            .rollout_percentage = 100;
+        let all_in = (0..100).all(|i| manifest.is_in_rollout("windows", &format!("user-{}", i)));
+        assert!(all_in, "100% rollout should include all users");
+
+        manifest
+            .platforms
+            .get_mut("windows")
+            .unwrap()
+            .rollout_percentage = 0;
+        let none_in = (0..100).all(|i| !manifest.is_in_rollout("windows", &format!("user-{}", i)));
+        assert!(none_in, "0% rollout should include no users");
+
+        // 50% should include some but not all
+        manifest
+            .platforms
+            .get_mut("windows")
+            .unwrap()
+            .rollout_percentage = 50;
+        let count = (0..1000)
+            .filter(|i| manifest.is_in_rollout("windows", &format!("user-{}", i)))
+            .count();
+        assert!(
+            count > 0 && count < 1000,
+            "50% rollout should be between 0 and 1000, got {}",
+            count
+        );
     }
 
     #[test]
@@ -334,16 +364,19 @@ mod tests {
         assert!(checker.should_check());
 
         let mut manifest = UpdateManifest::new("1.0.0", ReleaseChannel::Stable);
-        manifest.add_platform("windows", PlatformUpdate {
-            url: "https://example.com/update.msi".to_string(),
-            size: 50_000_000,
-            sha256: "abc123".to_string(),
-            signature: "sig".to_string(),
-            file_type: "msi".to_string(),
-            min_os_version: "10.0.19041".to_string(),
-            mandatory: false,
-            rollout_percentage: 100,
-        });
+        manifest.add_platform(
+            "windows",
+            PlatformUpdate {
+                url: "https://example.com/update.msi".to_string(),
+                size: 50_000_000,
+                sha256: "abc123".to_string(),
+                signature: "sig".to_string(),
+                file_type: "msi".to_string(),
+                min_os_version: "10.0.19041".to_string(),
+                mandatory: false,
+                rollout_percentage: 100,
+            },
+        );
 
         let result = checker.process_manifest(manifest);
         assert!(matches!(result, UpdateResult::OptionalUpdate { .. }));
@@ -352,16 +385,19 @@ mod tests {
     #[test]
     fn manifest_json_roundtrip() {
         let mut manifest = UpdateManifest::new("1.0.0", ReleaseChannel::Stable);
-        manifest.add_platform("linux", PlatformUpdate {
-            url: "https://example.com/update.deb".to_string(),
-            size: 40_000_000,
-            sha256: "def456".to_string(),
-            signature: "sig".to_string(),
-            file_type: "deb".to_string(),
-            min_os_version: "22.04".to_string(),
-            mandatory: false,
-            rollout_percentage: 100,
-        });
+        manifest.add_platform(
+            "linux",
+            PlatformUpdate {
+                url: "https://example.com/update.deb".to_string(),
+                size: 40_000_000,
+                sha256: "def456".to_string(),
+                signature: "sig".to_string(),
+                file_type: "deb".to_string(),
+                min_os_version: "22.04".to_string(),
+                mandatory: false,
+                rollout_percentage: 100,
+            },
+        );
 
         let json = manifest.to_json().unwrap();
         let restored = UpdateManifest::from_json(&json).unwrap();

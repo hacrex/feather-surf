@@ -3,7 +3,7 @@
 // Cookie management, third-party cookie blocking, and storage controls.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Cookie ─────────────────────────────────────────────────────────
 
@@ -96,22 +96,22 @@ impl CookieStore {
             return false;
         }
 
+        // Check total limit first (before holding any domain entry)
+        let total: usize = self.cookies.values().map(|c| c.len()).sum();
+        if total >= self.max_total {
+            // Remove oldest cookie overall
+            if let Some(cookies) = self.cookies.values_mut().next() {
+                if !cookies.is_empty() {
+                    cookies.remove(0);
+                }
+            }
+        }
+
         // Check per-domain limit
         let domain_cookies = self.cookies.entry(cookie.domain.clone()).or_default();
         if domain_cookies.len() >= self.max_per_domain {
             // Remove oldest cookie
             domain_cookies.remove(0);
-        }
-
-        // Check total limit
-        let total: usize = self.cookies.values().map(|c| c.len()).sum();
-        if total >= self.max_total {
-            // Remove oldest cookie overall
-            if let Some((_, cookies)) = self.cookies.iter_mut().next() {
-                if !cookies.is_empty() {
-                    cookies.remove(0);
-                }
-            }
         }
 
         // Add or update cookie
@@ -126,15 +126,15 @@ impl CookieStore {
 
     /// Get a cookie by domain and name.
     pub fn get_cookie(&self, domain: &str, name: &str) -> Option<&Cookie> {
-        self.cookies
-            .get(domain)?
-            .iter()
-            .find(|c| c.name == name)
+        self.cookies.get(domain)?.iter().find(|c| c.name == name)
     }
 
     /// Get all cookies for a domain.
     pub fn cookies_for_domain(&self, domain: &str) -> Vec<&Cookie> {
-        self.cookies.get(domain).map(|c| c.as_ref()).unwrap_or_default()
+        self.cookies
+            .get(domain)
+            .map(|c| c.iter().collect())
+            .unwrap_or_default()
     }
 
     /// Get all cookies matching a URL.
@@ -181,9 +181,7 @@ impl CookieStore {
         let before: usize = self.cookies.values().map(|c| c.len()).sum();
 
         for cookies in self.cookies.values_mut() {
-            cookies.retain(|c| {
-                c.expires.map_or(true, |exp| exp > now)
-            });
+            cookies.retain(|c| c.expires.map_or(true, |exp| exp > now));
         }
 
         // Remove empty domains
@@ -310,19 +308,28 @@ impl StorageManager {
 
     /// Add a storage entry.
     pub fn add_entry(&mut self, entry: StorageEntry) -> bool {
+        // Check total limit first (before holding any origin entry)
+        let total_size: u64 = self
+            .entries
+            .values()
+            .flat_map(|e| e.iter())
+            .map(|e| e.size)
+            .sum();
+        if total_size + entry.size > self.total_limit {
+            return false;
+        }
+
         let origin_entries = self.entries.entry(entry.origin.clone()).or_default();
 
         // Check per-origin quota
         let current_size: u64 = origin_entries.iter().map(|e| e.size).sum();
-        let quota = self.quotas.get(&entry.origin).copied().unwrap_or(self.default_quota);
+        let quota = self
+            .quotas
+            .get(&entry.origin)
+            .copied()
+            .unwrap_or(self.default_quota);
 
         if current_size + entry.size > quota {
-            return false;
-        }
-
-        // Check total limit
-        let total_size: u64 = self.entries.values().flat_map(|e| e.iter()).map(|e| e.size).sum();
-        if total_size + entry.size > self.total_limit {
             return false;
         }
 
@@ -332,7 +339,10 @@ impl StorageManager {
 
     /// Get all entries for an origin.
     pub fn entries_for_origin(&self, origin: &str) -> Vec<&StorageEntry> {
-        self.entries.get(origin).map(|e| e.as_ref()).unwrap_or_default()
+        self.entries
+            .get(origin)
+            .map(|e| e.iter().collect())
+            .unwrap_or_default()
     }
 
     /// Get entries by type.
@@ -385,7 +395,11 @@ impl StorageManager {
 
     /// Get total storage size.
     pub fn total_size(&self) -> u64 {
-        self.entries.values().flat_map(|e| e.iter()).map(|e| e.size).sum()
+        self.entries
+            .values()
+            .flat_map(|e| e.iter())
+            .map(|e| e.size)
+            .sum()
     }
 
     /// Get storage size for an origin.

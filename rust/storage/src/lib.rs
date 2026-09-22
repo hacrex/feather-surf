@@ -3,9 +3,9 @@
 // Bookmarks and history storage with in-memory backend.
 // Designed to be backed by SQLite in production.
 
-pub mod profiles;
-pub mod preferences;
 pub mod import_export;
+pub mod preferences;
+pub mod profiles;
 
 use std::collections::HashMap;
 use std::time::SystemTime;
@@ -111,18 +111,12 @@ impl BookmarkStore {
         let q = query.to_lowercase();
         self.bookmarks
             .values()
-            .filter(|bm| {
-                bm.title.to_lowercase().contains(&q) || bm.url.to_lowercase().contains(&q)
-            })
+            .filter(|bm| bm.title.to_lowercase().contains(&q) || bm.url.to_lowercase().contains(&q))
             .collect()
     }
 
     /// Create a folder. Returns the folder ID.
-    pub fn add_folder(
-        &mut self,
-        name: impl Into<String>,
-        parent_id: Option<u64>,
-    ) -> u64 {
+    pub fn add_folder(&mut self, name: impl Into<String>, parent_id: Option<u64>) -> u64 {
         let id = self.next_id;
         self.next_id += 1;
         self.folders.insert(
@@ -286,10 +280,8 @@ impl HistoryStore {
         let q = query.to_lowercase();
         self.entries
             .iter()
-            .rev()  // Most recent first
-            .filter(|e| {
-                e.url.to_lowercase().contains(&q) || e.title.to_lowercase().contains(&q)
-            })
+            .rev() // Most recent first
+            .filter(|e| e.url.to_lowercase().contains(&q) || e.title.to_lowercase().contains(&q))
             .collect()
     }
 
@@ -478,7 +470,11 @@ mod tests {
     fn remove_url_from_history() {
         let mut store = HistoryStore::new();
         store.record("https://example.com", "Example", TransitionType::Typed);
-        store.record("https://example.com", "Example Again", TransitionType::Reload);
+        store.record(
+            "https://example.com",
+            "Example Again",
+            TransitionType::Reload,
+        );
         store.record("https://other.com", "Other", TransitionType::Typed);
 
         let removed = store.remove_url("https://example.com");

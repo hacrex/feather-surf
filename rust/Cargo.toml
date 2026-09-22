@@ -17,6 +17,8 @@ members = [
     "sync",
     "ai",
     "benchmarks",
+    "updater",
+    "beta-testing",
 ]
 
 [workspace.package]

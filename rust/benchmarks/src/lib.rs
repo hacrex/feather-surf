@@ -4,7 +4,7 @@
 // Tracks memory, CPU, startup time, and restore time.
 
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 // ── Benchmark Configuration ────────────────────────────────────────
 
@@ -110,49 +110,94 @@ impl BenchmarkHarness {
     /// Set default performance budgets.
     fn set_budgets(&mut self) {
         // Cold startup: < 2000ms
-        self.budgets.insert(BenchmarkType::ColdStartup, vec![
-            PerformanceBudget { metric: "startup_ms".to_string(), max_value: 2000.0, unit: "ms".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::ColdStartup,
+            vec![PerformanceBudget {
+                metric: "startup_ms".to_string(),
+                max_value: 2000.0,
+                unit: "ms".to_string(),
+            }],
+        );
 
         // Warm startup: < 500ms
-        self.budgets.insert(BenchmarkType::WarmStartup, vec![
-            PerformanceBudget { metric: "startup_ms".to_string(), max_value: 500.0, unit: "ms".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::WarmStartup,
+            vec![PerformanceBudget {
+                metric: "startup_ms".to_string(),
+                max_value: 500.0,
+                unit: "ms".to_string(),
+            }],
+        );
 
         // Tab restore: < 1000ms per tab
-        self.budgets.insert(BenchmarkType::TabRestore, vec![
-            PerformanceBudget { metric: "restore_ms".to_string(), max_value: 1000.0, unit: "ms".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::TabRestore,
+            vec![PerformanceBudget {
+                metric: "restore_ms".to_string(),
+                max_value: 1000.0,
+                unit: "ms".to_string(),
+            }],
+        );
 
         // Memory under load (10 tabs): < 300MB
-        self.budgets.insert(BenchmarkType::MemoryLoad10, vec![
-            PerformanceBudget { metric: "memory_bytes".to_string(), max_value: 300.0 * 1024.0 * 1024.0, unit: "bytes".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::MemoryLoad10,
+            vec![PerformanceBudget {
+                metric: "memory_bytes".to_string(),
+                max_value: 300.0 * 1024.0 * 1024.0,
+                unit: "bytes".to_string(),
+            }],
+        );
 
         // Memory under load (50 tabs): < 800MB
-        self.budgets.insert(BenchmarkType::MemoryLoad50, vec![
-            PerformanceBudget { metric: "memory_bytes".to_string(), max_value: 800.0 * 1024.0 * 1024.0, unit: "bytes".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::MemoryLoad50,
+            vec![PerformanceBudget {
+                metric: "memory_bytes".to_string(),
+                max_value: 800.0 * 1024.0 * 1024.0,
+                unit: "bytes".to_string(),
+            }],
+        );
 
         // Memory under load (100 tabs): < 1.5GB
-        self.budgets.insert(BenchmarkType::MemoryLoad100, vec![
-            PerformanceBudget { metric: "memory_bytes".to_string(), max_value: 1.5 * 1024.0 * 1024.0 * 1024.0, unit: "bytes".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::MemoryLoad100,
+            vec![PerformanceBudget {
+                metric: "memory_bytes".to_string(),
+                max_value: 1.5 * 1024.0 * 1024.0 * 1024.0,
+                unit: "bytes".to_string(),
+            }],
+        );
 
         // Background CPU: < 1%
-        self.budgets.insert(BenchmarkType::BackgroundCpu, vec![
-            PerformanceBudget { metric: "cpu_percent".to_string(), max_value: 1.0, unit: "percent".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::BackgroundCpu,
+            vec![PerformanceBudget {
+                metric: "cpu_percent".to_string(),
+                max_value: 1.0,
+                unit: "percent".to_string(),
+            }],
+        );
 
         // Privacy filter latency: < 1ms
-        self.budgets.insert(BenchmarkType::PrivacyFilter, vec![
-            PerformanceBudget { metric: "latency_ms".to_string(), max_value: 1.0, unit: "ms".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::PrivacyFilter,
+            vec![PerformanceBudget {
+                metric: "latency_ms".to_string(),
+                max_value: 1.0,
+                unit: "ms".to_string(),
+            }],
+        );
 
         // Navigation speed: < 500ms
-        self.budgets.insert(BenchmarkType::NavigationSpeed, vec![
-            PerformanceBudget { metric: "navigation_ms".to_string(), max_value: 500.0, unit: "ms".to_string() },
-        ]);
+        self.budgets.insert(
+            BenchmarkType::NavigationSpeed,
+            vec![PerformanceBudget {
+                metric: "navigation_ms".to_string(),
+                max_value: 500.0,
+                unit: "ms".to_string(),
+            }],
+        );
     }
 
     /// Record a benchmark result.
@@ -187,7 +232,7 @@ impl BenchmarkHarness {
     /// Compare a result against baseline.
     pub fn compare_to_baseline(&self, result: &BenchmarkResult) -> Option<BenchmarkComparison> {
         let baseline = self.baselines.get(&result.benchmark_type)?;
-        
+
         let mut comparisons = HashMap::new();
         for (metric, value) in &result.metrics {
             if let Some(&baseline_value) = baseline.metrics.get(metric) {
@@ -210,12 +255,16 @@ impl BenchmarkHarness {
 
     /// Get results by type.
     pub fn results_by_type(&self, benchmark_type: BenchmarkType) -> Vec<&BenchmarkResult> {
-        self.results.iter().filter(|r| r.benchmark_type == benchmark_type).collect()
+        self.results
+            .iter()
+            .filter(|r| r.benchmark_type == benchmark_type)
+            .collect()
     }
 
     /// Get the latest result for a benchmark type.
     pub fn latest(&self, benchmark_type: BenchmarkType) -> Option<&BenchmarkResult> {
-        self.results.iter()
+        self.results
+            .iter()
             .filter(|r| r.benchmark_type == benchmark_type)
             .last()
     }
@@ -242,14 +291,14 @@ impl BenchmarkHarness {
             }
 
             report.push_str(&format!("## {:?}\n\n", benchmark_type));
-            
+
             if let Some(latest) = self.latest(*benchmark_type) {
                 let within = if latest.within_budget { "✅" } else { "❌" };
                 report.push_str(&format!("Status: {}\n\n", within));
-                
+
                 report.push_str("| Metric | Value | Budget |\n");
                 report.push_str("|--------|-------|--------|\n");
-                
+
                 if let Some(budgets) = self.budgets.get(benchmark_type) {
                     for budget in budgets {
                         if let Some(&value) = latest.metrics.get(&budget.metric) {
@@ -346,10 +395,10 @@ mod tests {
     #[test]
     fn baseline_comparison() {
         let mut harness = BenchmarkHarness::new();
-        
+
         let mut baseline_metrics = HashMap::new();
         baseline_metrics.insert("startup_ms".to_string(), 2000.0);
-        
+
         harness.set_baseline(BenchmarkResult {
             benchmark_type: BenchmarkType::ColdStartup,
             hardware_tier: HardwareTier::Medium,
@@ -362,7 +411,7 @@ mod tests {
 
         let mut current_metrics = HashMap::new();
         current_metrics.insert("startup_ms".to_string(), 1500.0);
-        
+
         let current = BenchmarkResult {
             benchmark_type: BenchmarkType::ColdStartup,
             hardware_tier: HardwareTier::Medium,

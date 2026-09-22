@@ -6,6 +6,7 @@ license.workspace = true
 description = "Download management for FeatherSurf"
 
 [dependencies]
+dirs = "5"
 serde = { version = "1", features = ["derive"] }
 thiserror = "2"
 

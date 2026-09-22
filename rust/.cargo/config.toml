@@ -1,10 +1,10 @@
 [build]
 # Default target (host machine)
 # target is set per-platform in build scripts
+target = "x86_64-pc-windows-gnu"
 
-[target.'cfg(target_os = "windows")']
-# Windows x64 - MSVC toolchain
-# Linker is configured via build scripts or environment
+[target.x86_64-pc-windows-gnu]
+linker = "C:\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe"
 
 [target.'cfg(target_os = "linux")']
 # Linux x64 - GCC toolchain

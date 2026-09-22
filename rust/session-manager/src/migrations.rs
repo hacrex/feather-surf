@@ -3,7 +3,6 @@
 // Session schema versioning and migration support.
 // Handles backward-compatible upgrades of session data.
 
-use std::collections::HashMap;
 use std::time::SystemTime;
 
 // ── Schema Version ─────────────────────────────────────────────────

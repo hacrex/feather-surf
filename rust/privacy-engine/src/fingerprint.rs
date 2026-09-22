@@ -7,7 +7,7 @@ use std::collections::HashMap;
 // ── Fingerprinting Detection ───────────────────────────────────────
 
 /// Fingerprinting technique categories.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum FingerprintType {
     /// Canvas fingerprinting.
     Canvas,
@@ -217,7 +217,11 @@ impl FingerprintProtection {
     }
 
     /// Set global protection status for a type.
-    pub fn set_global_status(&mut self, fingerprint_type: FingerprintType, status: ProtectionStatus) {
+    pub fn set_global_status(
+        &mut self,
+        fingerprint_type: FingerprintType,
+        status: ProtectionStatus,
+    ) {
         match fingerprint_type {
             FingerprintType::Canvas => self.config.canvas = status,
             FingerprintType::WebGL => self.config.webgl = status,
@@ -252,20 +256,20 @@ impl FingerprintProtection {
 
     /// Get attempts for a specific origin.
     pub fn attempts_for_origin(&self, origin: &str) -> Vec<&FingerprintAttempt> {
-        self.attempts.iter().filter(|a| a.origin == origin).collect()
+        self.attempts
+            .iter()
+            .filter(|a| a.origin == origin)
+            .collect()
     }
 
     /// Get statistics.
     pub fn stats(&self) -> FingerprintStats {
         let total = self.attempts.len();
         let blocked = self.attempts.iter().filter(|a| a.blocked).count();
-        let by_type = self
-            .attempts
-            .iter()
-            .fold(HashMap::new(), |mut acc, a| {
-                *acc.entry(a.fingerprint_type).or_insert(0) += 1;
-                acc
-            });
+        let by_type = self.attempts.iter().fold(HashMap::new(), |mut acc, a| {
+            *acc.entry(a.fingerprint_type).or_insert(0) += 1;
+            acc
+        });
 
         FingerprintStats {
             total_attempts: total,
@@ -354,11 +358,8 @@ mod tests {
     #[test]
     fn block_canvas_fingerprint() {
         let mut protection = FingerprintProtection::new();
-        let blocked = protection.should_block(
-            "https://example.com",
-            FingerprintType::Canvas,
-            "toDataURL",
-        );
+        let blocked =
+            protection.should_block("https://example.com", FingerprintType::Canvas, "toDataURL");
         assert!(blocked);
     }
 
@@ -380,11 +381,8 @@ mod tests {
         config.canvas = ProtectionStatus::Disabled;
         protection.add_site_exception("https://trusted.com", config);
 
-        let blocked = protection.should_block(
-            "https://trusted.com",
-            FingerprintType::Canvas,
-            "toDataURL",
-        );
+        let blocked =
+            protection.should_block("https://trusted.com", FingerprintType::Canvas, "toDataURL");
         assert!(!blocked);
     }
 
@@ -392,7 +390,11 @@ mod tests {
     fn record_attempts() {
         let mut protection = FingerprintProtection::new();
         protection.should_block("https://example.com", FingerprintType::Canvas, "toDataURL");
-        protection.should_block("https://example.com", FingerprintType::WebGL, "getParameter");
+        protection.should_block(
+            "https://example.com",
+            FingerprintType::WebGL,
+            "getParameter",
+        );
 
         let stats = protection.stats();
         assert_eq!(stats.total_attempts, 2);

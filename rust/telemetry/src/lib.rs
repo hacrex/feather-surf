@@ -5,4 +5,4 @@
 
 pub mod logger;
 
-pub use logger::{Logger, LogLevel, Redactor, LogEntry};
+pub use logger::{LogEntry, LogLevel, Logger, Redactor};

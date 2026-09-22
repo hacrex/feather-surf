@@ -11,6 +11,8 @@
 #include <string>
 #include <map>
 
+struct FfiTab;
+
 class CefHandler : public CefClient,
                    public CefLifeSpanHandler,
                    public CefLoadHandler,
@@ -73,8 +75,10 @@ public:
 
 private:
     // Map of browser IDs to tab IDs
-    std::map<int64_t, int64_t> browser_to_tab_;
-    std::map<int64_t, CefRefPtr<CefBrowser>> tab_to_browser_;
+    std::map<int64_t, uint64_t> browser_to_tab_;
+    std::map<uint64_t, CefRefPtr<CefBrowser>> tab_to_browser_;
+    // FFI tab handles for lifecycle management
+    std::map<uint64_t, FfiTab*> tab_handles_;
 
     IMPLEMENT_REFCOUNTING(CefHandler);
     DISALLOW_COPY_AND_ASSIGN(CefHandler);

@@ -56,11 +56,8 @@ pub trait Renderer {
     /// - `Frozen`: Pause JavaScript execution
     /// - `Suspended`: Serialize state and release renderer process
     /// - `Discardable`: Mark as discardable under memory pressure
-    fn notify_state_change(
-        &mut self,
-        id: RendererId,
-        state: TabState,
-    ) -> Result<(), RendererError>;
+    fn notify_state_change(&mut self, id: RendererId, state: TabState)
+        -> Result<(), RendererError>;
 
     /// Destroy a renderer and release its resources.
     fn destroy_renderer(&mut self, id: RendererId) -> Result<(), RendererError>;

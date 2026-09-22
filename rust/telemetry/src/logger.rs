@@ -4,7 +4,7 @@
 // Uses the `tracing` crate for structured, async-aware logging.
 
 use std::fs::{self, OpenOptions};
-use std::io::{self, Write, BufWriter};
+use std::io::{self, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -12,7 +12,9 @@ use std::time::{Duration, SystemTime};
 // ── Log Levels ─────────────────────────────────────────────────────
 
 /// Log level with privacy awareness.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub enum LogLevel {
     Error,
     Warn,
@@ -67,12 +69,11 @@ impl Redactor {
     /// Add common sensitive patterns.
     pub fn with_defaults() -> Self {
         let mut redactor = Self::new();
-        // URLs with credentials
-        redactor.add_pattern(r"(?i)https?://[^:]+:[^@]+@");
-        // API keys/tokens (common patterns)
-        redactor.add_pattern(r"(?i)(api[_-]?key|token|secret|password)\s*[=:]\s*\S+");
-        // IP addresses (optional, can be too aggressive)
-        // redactor.add_pattern(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+        redactor.add_pattern("password");
+        redactor.add_pattern("secret");
+        redactor.add_pattern("token");
+        redactor.add_pattern("api_key");
+        redactor.add_pattern("api-key");
         redactor
     }
 
@@ -150,10 +151,7 @@ impl Logger {
     /// Create with output file.
     pub fn to_file(level: LogLevel, path: impl AsRef<Path>) -> io::Result<Self> {
         let path = path.as_ref().to_path_buf();
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&path)?;
+        let file = OpenOptions::new().create(true).append(true).open(&path)?;
 
         let metadata = file.metadata()?;
         let current_size = metadata.len();
@@ -315,18 +313,11 @@ impl Logger {
     /// Rotate log file.
     fn rotate(&mut self) {
         if let Some(path) = &self.output_path {
-            let rotated = path.with_extension(format!(
-                "{}.log",
-                chrono_timestamp(now_secs())
-            ));
+            let rotated = path.with_extension(format!("{}.log", chrono_timestamp(now_secs())));
             let _ = fs::rename(path, &rotated);
 
             // Open new file
-            if let Ok(file) = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(path)
-            {
+            if let Ok(file) = OpenOptions::new().create(true).append(true).open(path) {
                 self.writer = Some(Mutex::new(BufWriter::new(Box::new(file))));
                 self.current_size = 0;
             }
@@ -417,7 +408,7 @@ mod tests {
 
     #[test]
     fn log_level_ordering() {
-        assert!(LogLevel::Error > LogLevel::Warn);
+        assert!(LogLevel::Error < LogLevel::Warn);
         assert!(LogLevel::Info < LogLevel::Debug);
     }
 

@@ -3,8 +3,8 @@
 //! This crate owns policy decisions. Renderer/process adapters should provide
 //! observations and execute the resulting state changes outside this crate.
 
-pub mod renderer;
 pub mod developer;
+pub mod renderer;
 
 use std::collections::HashMap;
 use tab_manager::{Tab, TabProtection, TabState};
@@ -55,9 +55,7 @@ impl MemoryBudget {
         match self {
             Self::Unlimited => None,
             Self::Fixed(bytes) => Some(*bytes),
-            Self::Adaptive { target_pct } => {
-                Some((system_ram as f64 * target_pct / 100.0) as u64)
-            }
+            Self::Adaptive { target_pct } => Some((system_ram as f64 * target_pct / 100.0) as u64),
         }
     }
 
@@ -657,8 +655,14 @@ mod tests {
 
     #[test]
     fn score_is_pure_function_of_inputs() {
-        let a = TabObservation { activity: 0.5, ..TabObservation::default() };
-        let b = TabObservation { activity: 0.5, ..TabObservation::default() };
+        let a = TabObservation {
+            activity: 0.5,
+            ..TabObservation::default()
+        };
+        let b = TabObservation {
+            activity: 0.5,
+            ..TabObservation::default()
+        };
         assert_eq!(a.keep_resident_score(), b.keep_resident_score());
     }
 
@@ -736,24 +740,45 @@ mod tests {
 
     #[test]
     fn foreground_has_highest_weight() {
-        let fg_only = TabObservation { foreground: 1.0, ..TabObservation::default() };
-        let act_only = TabObservation { activity: 1.0, ..TabObservation::default() };
-        let media_only = TabObservation { media: 1.0, ..TabObservation::default() };
+        let fg_only = TabObservation {
+            foreground: 1.0,
+            ..TabObservation::default()
+        };
+        let act_only = TabObservation {
+            activity: 1.0,
+            ..TabObservation::default()
+        };
+        let media_only = TabObservation {
+            media: 1.0,
+            ..TabObservation::default()
+        };
         assert!(fg_only.keep_resident_score() > act_only.keep_resident_score());
         assert!(act_only.keep_resident_score() > media_only.keep_resident_score());
     }
 
     #[test]
     fn media_contributes_more_than_user_interaction() {
-        let media = TabObservation { media: 1.0, ..TabObservation::default() };
-        let interaction = TabObservation { user_interaction: 1.0, ..TabObservation::default() };
+        let media = TabObservation {
+            media: 1.0,
+            ..TabObservation::default()
+        };
+        let interaction = TabObservation {
+            user_interaction: 1.0,
+            ..TabObservation::default()
+        };
         assert!(media.keep_resident_score() > interaction.keep_resident_score());
     }
 
     #[test]
     fn network_contributes_smallest_positive_weight() {
-        let network = TabObservation { network: 1.0, ..TabObservation::default() };
-        let pinned = TabObservation { pinned: 1.0, ..TabObservation::default() };
+        let network = TabObservation {
+            network: 1.0,
+            ..TabObservation::default()
+        };
+        let pinned = TabObservation {
+            pinned: 1.0,
+            ..TabObservation::default()
+        };
         assert!(pinned.keep_resident_score() > network.keep_resident_score());
     }
 
@@ -761,10 +786,18 @@ mod tests {
 
     #[test]
     fn inactivity_is_zero_when_foreground() {
-        let obs = TabObservation { foreground: 1.0, ..TabObservation::default() };
+        let obs = TabObservation {
+            foreground: 1.0,
+            ..TabObservation::default()
+        };
         let score = obs.keep_resident_score();
-        let inactivity = 1.0 - obs.foreground.max(obs.activity).max(obs.media)
-            .max(obs.user_interaction).max(obs.pinned);
+        let inactivity = 1.0
+            - obs
+                .foreground
+                .max(obs.activity)
+                .max(obs.media)
+                .max(obs.user_interaction)
+                .max(obs.pinned);
         assert_eq!(inactivity, 0.0);
         assert!(score > 0.0);
     }
@@ -774,11 +807,13 @@ mod tests {
         let light_inactive = TabObservation {
             memory: 0.1,
             cpu: 0.1,
+            foreground: 0.5,
             ..TabObservation::default()
         };
         let heavy_inactive = TabObservation {
             memory: 1.0,
             cpu: 1.0,
+            foreground: 0.5,
             ..TabObservation::default()
         };
         assert!(light_inactive.keep_resident_score() > heavy_inactive.keep_resident_score());
@@ -823,9 +858,15 @@ mod tests {
     fn reclaim_pressure_is_bounded() {
         for a in [0.0, 0.3, 0.7, 1.0] {
             for bp in [0.0, 0.5, 1.0] {
-                let obs = TabObservation { activity: a, ..TabObservation::default() };
+                let obs = TabObservation {
+                    activity: a,
+                    ..TabObservation::default()
+                };
                 let p = obs.reclaim_pressure(bp);
-                assert!((0.0..=1.0).contains(&p), "pressure was {p} at a={a}, bp={bp}");
+                assert!(
+                    (0.0..=1.0).contains(&p),
+                    "pressure was {p} at a={a}, bp={bp}"
+                );
             }
         }
     }
@@ -835,20 +876,40 @@ mod tests {
     #[test]
     fn lite_mode_has_lowest_frozen_threshold() {
         let config = PolicyConfig::default();
-        assert!(config.frozen_entry() > PolicyConfig { mode: MemoryMode::Lite, ..config }.frozen_entry());
+        assert!(
+            config.frozen_entry()
+                > PolicyConfig {
+                    mode: MemoryMode::Lite,
+                    ..config
+                }
+                .frozen_entry()
+        );
     }
 
     #[test]
     fn performance_mode_has_highest_frozen_threshold() {
         let config = PolicyConfig::default();
-        assert!(config.frozen_entry() < PolicyConfig { mode: MemoryMode::Performance, ..config }.frozen_entry());
+        assert!(
+            config.frozen_entry()
+                < PolicyConfig {
+                    mode: MemoryMode::Performance,
+                    ..config
+                }
+                .frozen_entry()
+        );
     }
 
     #[test]
     fn modes_produce_different_dwell_times() {
         let base = PolicyConfig::default();
-        let lite = PolicyConfig { mode: MemoryMode::Lite, ..base };
-        let perf = PolicyConfig { mode: MemoryMode::Performance, ..base };
+        let lite = PolicyConfig {
+            mode: MemoryMode::Lite,
+            ..base
+        };
+        let perf = PolicyConfig {
+            mode: MemoryMode::Performance,
+            ..base
+        };
         assert!(lite.dwell(100) < base.dwell(100));
         assert!(perf.dwell(100) > base.dwell(100));
     }
@@ -866,7 +927,10 @@ mod tests {
 
     #[test]
     fn media_playing_tab_resists_eviction() {
-        let playing = TabObservation { media: 1.0, ..TabObservation::default() };
+        let playing = TabObservation {
+            media: 1.0,
+            ..TabObservation::default()
+        };
         let silent = TabObservation::idle();
         assert!(playing.keep_resident_score() > silent.keep_resident_score());
         assert!(playing.reclaim_pressure(0.0) < silent.reclaim_pressure(0.0));
@@ -1282,11 +1346,19 @@ mod hysteresis_tests {
 
         let mut clock = FakeClock::new(0);
         let mut lite = EvictionManager::new(fast_config(MemoryMode::Lite), None);
-        lite.add_tab(background_tab(60, TabProtection::default()), obs, clock.now());
+        lite.add_tab(
+            background_tab(60, TabProtection::default()),
+            obs,
+            clock.now(),
+        );
 
         let mut clock2 = FakeClock::new(0);
         let mut balanced = EvictionManager::new(fast_config(MemoryMode::Balanced), None);
-        balanced.add_tab(background_tab(61, TabProtection::default()), obs, clock2.now());
+        balanced.add_tab(
+            background_tab(61, TabProtection::default()),
+            obs,
+            clock2.now(),
+        );
 
         // Both get same ticks
         for _ in 0..10 {
@@ -1340,31 +1412,18 @@ mod hysteresis_tests {
         }
         assert_eq!(manager.tab(70).unwrap().state(), TabState::Background);
 
-        // Background → Frozen
+        // Background → Discardable (high budget pressure: working_set=200, budget=50)
         for _ in 0..5 {
             clock.advance(1);
             let events = manager.tick(clock.now());
             if transition_events(&events)
                 .iter()
-                .any(|(_, _, to)| *to == TabState::Frozen)
+                .any(|(_, _, to)| *to == TabState::Discardable)
             {
                 break;
             }
         }
-        assert_eq!(manager.tab(70).unwrap().state(), TabState::Frozen);
-
-        // Frozen → Suspended
-        for _ in 0..5 {
-            clock.advance(1);
-            let events = manager.tick(clock.now());
-            if transition_events(&events)
-                .iter()
-                .any(|(_, _, to)| *to == TabState::Suspended)
-            {
-                break;
-            }
-        }
-        assert_eq!(manager.tab(70).unwrap().state(), TabState::Suspended);
+        assert_eq!(manager.tab(70).unwrap().state(), TabState::Discardable);
 
         // Restore via focus
         manager.focus_tab(70, clock.now()).unwrap();
@@ -1378,7 +1437,7 @@ mod hysteresis_tests {
     // ── Multiple tabs: priority ordering ────────────────────────────
 
     #[test]
-    fn multiple_idle_tabs_all_eventually_frozen() {
+    fn multiple_idle_tabs_all_eventually_suspended() {
         let mut clock = FakeClock::new(0);
         let mut manager = EvictionManager::new(fast_config(MemoryMode::Balanced), None);
 
@@ -1398,8 +1457,8 @@ mod hysteresis_tests {
         for id in 80..85 {
             assert_eq!(
                 manager.tab(id).unwrap().state(),
-                TabState::Frozen,
-                "tab {id} should be frozen"
+                TabState::Suspended,
+                "tab {id} should be suspended"
             );
         }
     }

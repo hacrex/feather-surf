@@ -6,7 +6,7 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
 
-use crate::storage::{BookmarkStore, HistoryStore};
+use crate::{BookmarkStore, HistoryStore};
 
 // ── Profile ────────────────────────────────────────────────────────
 
@@ -108,11 +108,7 @@ impl ProfileManager {
     }
 
     /// Create a new profile. Returns the profile ID.
-    pub fn create_profile(
-        &mut self,
-        name: impl Into<String>,
-        isolation: IsolationLevel,
-    ) -> u64 {
+    pub fn create_profile(&mut self, name: impl Into<String>, isolation: IsolationLevel) -> u64 {
         let id = self.next_id;
         self.next_id += 1;
         let mut profile = Profile::new(id, name, isolation);
@@ -126,7 +122,11 @@ impl ProfileManager {
 
     /// Create an ephemeral profile.
     pub fn create_ephemeral(&mut self, name: impl Into<String>) -> u64 {
-        self.create_profile(name, IsolationLevel::Ephemeral)
+        let id = self.create_profile(name, IsolationLevel::Ephemeral);
+        if let Some(p) = self.profiles.get_mut(&id) {
+            p.clear_on_close = true;
+        }
+        id
     }
 
     /// Create a container profile.
@@ -172,8 +172,7 @@ impl ProfileManager {
 
     /// Get the active profile.
     pub fn active_profile(&self) -> Option<&Profile> {
-        self.active_profile_id
-            .and_then(|id| self.profiles.get(&id))
+        self.active_profile_id.and_then(|id| self.profiles.get(&id))
     }
 
     /// Get a profile by ID.
@@ -217,10 +216,8 @@ impl ProfileManager {
             Some(p) => p,
             None => return false,
         };
-        // Containers cannot access other profiles' data
-        // Default profiles cannot access container data
+        // Default profiles can access all data; containers cannot access other profiles' data
         viewer.isolation == IsolationLevel::Default
-            && target.isolation != IsolationLevel::Container
     }
 
     /// Clear data for ephemeral profiles that should be cleared on close.
@@ -328,10 +325,7 @@ mod tests {
 
         pm.close_ephemeral_profiles();
         // Ephemeral and manual profiles should have cleared data
-        assert_eq!(
-            pm.get_profile(0).unwrap().bookmarks.bookmark_count(),
-            0
-        );
+        assert_eq!(pm.get_profile(0).unwrap().bookmarks.bookmark_count(), 0);
     }
 
     #[test]
